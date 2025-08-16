@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 24 24">
+  <rect width="24" height="24" rx="5" fill="#14191b"/>
+  <!-- Tower mast -->
+  <path d="M12 7 L15 18 H9 Z" fill="var(--accent)"/>
+  <!-- Signal rings -->
+  <circle cx="12" cy="6" r="2" fill="none" stroke="var(--accent)" stroke-width="1.5"/>
+  <circle cx="12" cy="6" r="4" fill="none" stroke="var(--accent)" stroke-width="1.5"/>
+</svg>

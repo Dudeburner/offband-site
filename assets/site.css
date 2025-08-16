@@ -29,6 +29,14 @@ a, .btn{touch-action:manipulation}
 .container{max-width:72ch;margin:0 auto;padding:20px}
 @media (min-width:640px){ .container{padding:28px} }
 
+.brand .logo {
+  width: 18px;
+  height: 18px;
+  display: inline-block;
+  vertical-align: -2px; /* nudges the logo baseline */
+  margin-right: 4px;
+}
+
 /* Header / nav */
 .header{
   position:sticky;top:0;z-index:10;
