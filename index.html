@@ -1,29 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Offband — Security-first community lab</title>
-  <link rel="stylesheet" href="/assets/site.css">
-  <link rel="icon" type="image/svg+xml" href="/assets/logo-favicon.svg">
-  <link rel="alternate icon" type="image/png" href="/assets/og-512.png" sizes="512x512">
-  <!-- Open Graph -->
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="Offband">
-  <meta property="og:title" content="Offband — Security-first community lab">
-  <meta property="og:description" content="Homelab notes, OSINT experiments, and small tools — built in public.">
-  <meta property="og:url" content="https://offband.dev/">
-  <meta property="og:image" content="https://offband.dev/assets/og-512.png">
-  
-  <!-- Twitter Card -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Offband — Security-first community lab">
-  <meta name="twitter:description" content="Homelab notes, OSINT experiments, and small tools — built in public.">
-  <meta name="twitter:image" content="https://offband.dev/assets/og-512.png">
-  <meta name="description" content="Offband publishes homelab notes, OSINT experiments, and small tools — built in public for anyone to replicate or adapt.">
-  <link rel="stylesheet" href="/assets/site.css">
-  <meta name="theme-color" content="#39FF14">
-</head>
+<header class="header">
+  <div class="container nav">
+    <div class="brand">
+      <img class="logo" src="/assets/logo-badge.svg" alt="Offband logo" width="18" height="18">
+      Offband
+    </div>
+
+    <!-- System area: auth-only UI lives here -->
+    <div class="sys" role="navigation" aria-label="Account">
+      <!-- Logged-out state -->
+      <a class="chip ghost show-logged-out" href="/login" aria-label="Log in">Login</a>
+
+      <!-- Logged-in state (hidden by default; see CSS below) -->
+      <a class="chip show-logged-in" href="/account" aria-label="Account">
+        <span class="avatar" aria-hidden="true"></span>
+        <span class="label">Account</span>
+      </a>
+    </div>
+  </div>
+</header>
 <body>
 <header class="header">
   <div class="container nav">

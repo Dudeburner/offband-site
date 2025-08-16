@@ -58,6 +58,40 @@ a, .btn{touch-action:manipulation}
   .nav > nav{width:100%;display:flex;gap:12px;flex-wrap:wrap}
 }
 
+/* --- System area (top-right auth UI) --- */
+.sys{display:flex;gap:10px}
+
+/* Pills / chips */
+.chip{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:6px 10px;border-radius:999px;
+  border:1px solid var(--ring); background:var(--bg-soft); color:var(--text);
+  font-size:.9rem; line-height:1; text-decoration:none;
+}
+.chip:hover{text-decoration:none;opacity:1}
+.chip.ghost{opacity:.85}
+
+/* Generic avatar circle (no auth backend yet) */
+.avatar{
+  width:18px;height:18px;border-radius:50%;
+  background:linear-gradient(180deg, rgba(255,255,255,.15), rgba(255,255,255,.05));
+  border:1px solid var(--ring);
+}
+
+/* Auth state toggles (pure-CSS; flip with body.is-auth later) */
+.show-logged-in{display:none}
+.show-logged-out{display:inline-flex}
+body.is-auth .show-logged-in{display:inline-flex}
+body.is-auth .show-logged-out{display:none}
+
+@media (max-width:720px){
+  .chip{padding:6px 8px}
+}
+
+/* --- Hero text helpers (used on homepage) --- */
+.lead{font-size:1.05rem;max-width:60ch}
+.sub{color:var(--muted);margin-top:.4rem;max-width:68ch}
+
 /* Layout */
 .main{padding-block:20px}
 .hero{
