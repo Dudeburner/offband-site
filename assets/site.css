@@ -3,7 +3,7 @@
   --bg-soft:#0a0d0e;
   --text:#e9e6e1;
   --muted:#a9a6a2;
-  --accent: #39FF14;         /* tweak this to rebrand fast */
+  --accent: #00FFFF;         /* tweak this to rebrand fast */
   --card:#14191b;
   --ring:#2a2f31;
   --radius:12px;
@@ -103,3 +103,8 @@ footer{margin-top:1.8rem;opacity:.78;font-size:.95rem}
 @media (prefers-reduced-motion: reduce){
   *{scroll-behavior:auto;animation:none;transition:none}
 }
+
+/* accent visibility */
+h1 { color: var(--accent); }
+a  { color: var(--accent); }           /* already present? fine to duplicate */
+.brand .dot { background: var(--accent); }
