@@ -1,27 +1,58 @@
-<!doctype html><html lang="en"><meta charset="utf-8">
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#7bd1ff">
 <title>Offband</title>
 <link rel="stylesheet" href="/assets/site.css">
 <link rel="canonical" href="https://offband.dev/">
 <meta name="description" content="Offband — security-first build-in-public lab.">
-<h1>Offband is live</h1>
 
-<nav>
-  <a href="/">Home</a>
-  <a href="/about.html">About</a>
-  <a href="/blog/">Blog</a>
-</nav>
+<body>
+<header class="header">
+  <div class="container nav">
+    <div class="brand"><span class="dot"></span> Offband</div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/about.html">About</a>
+      <a href="/blog/">Blog</a>
+    </nav>
+  </div>
+</header>
 
-<p>Baseline Nginx on a tiny Linode VM. HTTPS via Let’s Encrypt. Deployed from GitHub.</p>
+<main class="main">
+  <div class="container">
+    <section class="hero">
+      <h1>Offband is live</h1>
+      <p>Baseline Nginx on Linode. HTTPS via Let’s Encrypt. Deploys from GitHub.</p>
+      <div class="actions">
+        <a class="btn primary" href="/blog/">Read the blog</a>
+        <a class="btn" href="/about.html">About the project</a>
+      </div>
+    </section>
 
-<section>
-  <h2>Explore</h2>
-  <ul>
-    <li><a href="/about.html">About Offband</a></li>
-    <li><a href="/blog/">Blog</a></li>
-  </ul>
-</section>
+    <section class="grid">
+      <article class="card">
+        <h2>What’s here</h2>
+        <ul>
+          <li>Notes + writeups (homelab, hardening, OSINT/pentest)</li>
+          <li>Tiny tools and templates (bash-first)</li>
+        </ul>
+      </article>
+      <article class="card">
+        <h2>What’s next</h2>
+        <ul>
+          <li>Site v1 blog post</li>
+          <li>Server hardening series</li>
+        </ul>
+      </article>
+    </section>
 
-<footer>© <span id="y"></span> Offband • <a href="/sitemap.xml">sitemap</a></footer>
+    <div class="hr"></div>
+    <footer>© <span id="y"></span> Offband • <a href="/sitemap.xml">sitemap</a></footer>
+  </div>
+</main>
+
 <script>document.getElementById('y').textContent=(new Date).getFullYear()</script>
+</body>
 </html>
