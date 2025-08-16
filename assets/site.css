@@ -108,3 +108,42 @@ footer{margin-top:1.8rem;opacity:.78;font-size:.95rem}
 h1 { color: var(--accent); }
 a  { color: var(--accent); }           /* already present? fine to duplicate */
 .brand .dot { background: var(--accent); }
+
+/* === Sidebar / Tree === */
+.layout{display:grid;gap:16px}
+@media (min-width:860px){ .layout{grid-template-columns:260px 1fr} }
+
+aside.sidebar{
+  background:var(--card);
+  border:1px solid var(--ring);
+  border-radius:var(--radius);
+  padding:12px;
+  max-height:calc(100vh - 130px);
+  overflow:auto;
+}
+
+.tree{list-style:none;margin:0;padding:0}
+.tree li{margin:2px 0}
+.tree a{color:var(--text);opacity:.95}
+.tree .muted{color:var(--muted)}
+.tree .row{
+  display:flex;align-items:center;gap:6px;
+  padding:6px 6px;border-radius:8px;
+}
+.tree .row:hover{background:var(--bg-soft)}
+.tree .twisty{
+  border:0;background:transparent;color:var(--muted);
+  width:18px;cursor:pointer;font:inherit;line-height:1;
+}
+.tree .twisty:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+.tree .folder > ul{margin-left:20px;padding-left:8px;border-left:1px dashed var(--ring)}
+.tree .folder[aria-expanded="false"] > ul{display:none}
+
+@media (max-width:859px){
+  /* stack on mobile; sidebar first then content */
+  .layout{grid-template-columns:1fr}
+}
+
+/* active link highlight */
+.tree a.active{color:var(--accent);font-weight:600}
+.tree .row.active{background:var(--bg-soft)}

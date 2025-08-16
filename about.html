@@ -1,13 +1,12 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#7bd1ff">
-<title>About — Offband</title>
-<link rel="stylesheet" href="/assets/site.css">
-<link rel="canonical" href="https://offband.dev/about.html">
-<meta name="description" content="What Offband is, who runs it, and how to reach us.">
-
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About • Offband</title>
+  <link rel="stylesheet" href="/assets/site.css">
+  <meta name="theme-color" content="#39FF14">
+</head>
 <body>
 <header class="header">
   <div class="container nav">
@@ -21,27 +20,43 @@
 </header>
 
 <main class="main">
-  <div class="container">
-    <h1>About Offband</h1>
-    <p>Offband is a security-first, community-driven sandbox. We build in public:
-    homelab notes, hardening guides, OSINT/pentest writeups, and small tools.</p>
+  <div class="container layout">
+    <!-- sidebar -->
+    <aside class="sidebar" id="sb"></aside>
 
-    <h2>Contact</h2>
-	<!--EMAIL_START-->
-	<p>Email: <span id="e"><!-- filled at runtime --></span></p>
-	<script>(function(){
-	  const parts = ["Y29udGFjdA==","b2ZmYmFuZA==","ZGV2"]; // contact, offband, dev
-	  const addr = atob(parts[0])+"@"+atob(parts[1])+"."+atob(parts[2]);
-	  const el = document.getElementById("e");
-	  el.innerHTML = '<a href="mailto:'+addr+'">'+addr+'</a>';
-	})();</script>
-	<!--EMAIL_END-->
+    <!-- content -->
+    <section>
+      <h1>About Offband</h1>
+      <p>Offband is a personal project documenting security, homelab, and OSINT experiments. It’s designed to grow into a knowledge base, toolkit, and community.</p>
 
-    <div class="hr"></div>
-    <footer>© <span id="y"></span> Offband</footer>
+      <h2>Contact</h2>
+      <!--EMAIL_START-->
+      <p>Email: <span id="e"><!-- filled at runtime --></span></p>
+      <script>(function(){
+        const parts = ["Y29udGFjdA==","b2ZmYmFuZA==","ZGV2"]; // contact, offband, dev
+        const addr = atob(parts[0])+"@"+atob(parts[1])+"."+atob(parts[2]);
+        const el = document.getElementById("e");
+        el.innerHTML = '<a href="mailto:'+addr+'">'+addr+'</a>';
+      })();</script>
+      <!--EMAIL_END-->
+
+      <div class="hr"></div>
+      <footer>© <span id="y"></span> Offband</footer>
+    </section>
   </div>
 </main>
 
-<script>document.getElementById('y').textContent=(new Date).getFullYear()</script>
+<script src="/assets/sidebar.js" defer></script>
+<script>
+  fetch('/components/sidebar.html')
+    .then(r=>r.text())
+    .then(html=>{
+      const sb = document.getElementById('sb');
+      sb.innerHTML = html;
+      window.__initSidebarTree(sb);
+      window.__highlightActive(sb);
+    });
+  document.getElementById('y').textContent = (new Date).getFullYear();
+</script>
 </body>
 </html>

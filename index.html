@@ -1,13 +1,12 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#7bd1ff">
-<title>Offband</title>
-<link rel="stylesheet" href="/assets/site.css">
-<link rel="canonical" href="https://offband.dev/">
-<meta name="description" content="Offband — security-first build-in-public lab.">
-
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Offband</title>
+  <link rel="stylesheet" href="/assets/site.css">
+  <meta name="theme-color" content="#39FF14">
+</head>
 <body>
 <header class="header">
   <div class="container nav">
@@ -21,38 +20,55 @@
 </header>
 
 <main class="main">
-  <div class="container">
-    <section class="hero">
-      <h1>Offband is live</h1>
-      <p>Baseline Nginx on Linode. HTTPS via Let’s Encrypt. Deploys from GitHub.</p>
-      <div class="actions">
-        <a class="btn primary" href="/blog/">Read the blog</a>
-        <a class="btn" href="/about.html">About the project</a>
+  <div class="container layout">
+    <!-- sidebar -->
+    <aside class="sidebar" id="sb"></aside>
+
+    <!-- main content -->
+    <section>
+      <div class="hero">
+        <h1>Offband is live</h1>
+        <p>Baseline Nginx on Linode. HTTPS via Let’s Encrypt. Deploys from GitHub.</p>
+        <div class="actions">
+          <a class="btn primary" href="/blog/">Read the blog</a>
+          <a class="btn" href="/about.html">About the project</a>
+        </div>
       </div>
-    </section>
 
-    <section class="grid">
-      <article class="card">
-        <h2>What’s here</h2>
-        <ul>
-          <li>Notes + writeups (homelab, hardening, OSINT/pentest)</li>
-          <li>Tiny tools and templates (bash-first)</li>
-        </ul>
-      </article>
-      <article class="card">
-        <h2>What’s next</h2>
-        <ul>
-          <li>Site v1 blog post</li>
-          <li>Server hardening series</li>
-        </ul>
-      </article>
-    </section>
+      <section class="grid">
+        <article class="card">
+          <h2>What’s here</h2>
+          <ul>
+            <li>Notes + writeups (homelab, hardening, OSINT/pentest)</li>
+            <li>Tiny tools and templates (bash-first)</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h2>What’s next</h2>
+          <ul>
+            <li>Site v1 blog post</li>
+            <li>Server hardening series</li>
+          </ul>
+        </article>
+      </section>
 
-    <div class="hr"></div>
-    <footer>© <span id="y"></span> Offband • <a href="/sitemap.xml">sitemap</a></footer>
+      <div class="hr"></div>
+      <footer>© <span id="y"></span> Offband</footer>
+    </section>
   </div>
 </main>
 
-<script>document.getElementById('y').textContent=(new Date).getFullYear()</script>
+<script src="/assets/sidebar.js" defer></script>
+<script>
+  fetch('/components/sidebar.html')
+    .then(r=>r.text())
+    .then(html=>{
+      const sb = document.getElementById('sb');
+      sb.innerHTML = html;
+      window.__initSidebarTree(sb);
+      window.__highlightActive(sb);
+    });
+  document.getElementById('y').textContent = (new Date).getFullYear();
+</script>
 </body>
 </html>

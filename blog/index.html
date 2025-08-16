@@ -1,13 +1,12 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#7bd1ff">
-<title>Blog — Offband</title>
-<link rel="stylesheet" href="/assets/site.css">
-<link rel="canonical" href="https://offband.dev/blog/">
-<meta name="description" content="Build notes and security writeups from the Offband lab.">
-
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blog • Offband</title>
+  <link rel="stylesheet" href="/assets/site.css">
+  <meta name="theme-color" content="#39FF14">
+</head>
 <body>
 <header class="header">
   <div class="container nav">
@@ -21,17 +20,36 @@
 </header>
 
 <main class="main">
-  <div class="container">
-    <h1>Blog</h1>
-    <ul>
-      <li><a href="/blog/posts/coming-soon.html">Coming soon…</a> <small>— placeholder</small></li>
-    </ul>
+  <div class="container layout">
+    <!-- sidebar -->
+    <aside class="sidebar" id="sb"></aside>
 
-    <div class="hr"></div>
-    <footer>© <span id="y"></span> Offband</footer>
+    <!-- content -->
+    <section>
+      <h1>Blog</h1>
+      <p>Posts and writeups from the Offband project.</p>
+
+      <ul>
+        <li><a href="/blog/posts/coming-soon.html">Coming soon…</a></li>
+      </ul>
+
+      <div class="hr"></div>
+      <footer>© <span id="y"></span> Offband</footer>
+    </section>
   </div>
 </main>
 
-<script>document.getElementById('y').textContent=(new Date).getFullYear()</script>
+<script src="/assets/sidebar.js" defer></script>
+<script>
+  fetch('/components/sidebar.html')
+    .then(r=>r.text())
+    .then(html=>{
+      const sb = document.getElementById('sb');
+      sb.innerHTML = html;
+      window.__initSidebarTree(sb);
+      window.__highlightActive(sb);
+    });
+  document.getElementById('y').textContent = (new Date).getFullYear();
+</script>
 </body>
 </html>
