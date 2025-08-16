@@ -1,7 +1,31 @@
-<!doctype html><meta charset="utf-8">
+cat > index.html <<'HTML'
+<!doctype html><html lang="en"><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Offband Online Community</title>
-<h1>Offband is finally live!</h1>
-<h2>More features coming soon, thank you for your patience.</h2>
-<p>Please send any questions to ajbeaver16@gmail.com</p>
-<p>Served from Nginx on a Linode VM. Deployed via Github.</p>
+<title>Offband</title>
+<link rel="stylesheet" href="/assets/site.css">
+<link rel="canonical" href="https://offband.dev/">
+<meta name="description" content="Offband — security-first build-in-public lab.">
+<h1>Offband is live</h1>
+
+<nav>
+  <a href="/">Home</a>
+  <a href="/about.html">About</a>
+  <a href="/blog/">Blog</a>
+</nav>
+
+<p>Baseline Nginx on a tiny Linode VM. HTTPS via Let’s Encrypt. Deployed from GitHub.</p>
+
+<section>
+  <h2>Explore</h2>
+  <ul>
+    <li><a href="/about.html">About Offband</a></li>
+    <li><a href="/blog/">Blog</a></li>
+  </ul>
+</section>
+
+<footer>© <span id="y"></span> Offband • <a href="/sitemap.xml">sitemap</a></footer>
+<script>document.getElementById('y').textContent=(new Date).getFullYear()</script>
+</html>
+HTML
+
+git add index.html && git commit -m "homepage: add nav links to About/Blog" && git push
