@@ -1,37 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Offband — Security-first community lab</title>
+  <meta name="description" content="Offband publishes homelab notes, OSINT experiments, and small tools — built in public for anyone to replicate or adapt.">
+  <link rel="canonical" href="https://offband.dev/">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="/assets/site.css?v=home1">
+
+  <!-- Brand assets -->
+  <link rel="icon" type="image/svg+xml" href="/assets/logo-favicon.svg">
+  <link rel="alternate icon" type="image/png" href="/assets/og-512.png" sizes="512x512">
+  <meta name="theme-color" content="#39FF14">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Offband">
+  <meta property="og:title" content="Offband — Security-first community lab">
+  <meta property="og:description" content="Homelab notes, OSINT experiments, and small tools — built in public.">
+  <meta property="og:url" content="https://offband.dev/">
+  <meta property="og:image" content="https://offband.dev/assets/og-512.png">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Offband — Security-first community lab">
+  <meta name="twitter:description" content="Homelab notes, OSINT experiments, and small tools — built in public.">
+  <meta name="twitter:image" content="https://offband.dev/assets/og-512.png">
+</head>
+<body>
+
 <header class="header">
   <div class="container nav">
     <div class="brand">
-      <img class="logo" src="/assets/logo-badge.svg" alt="Offband logo" width="18" height="18">
+      <img class="logo" src="/assets/logo-badge.svg?v=2" alt="Offband logo" width="18" height="18">
       Offband
     </div>
 
-    <!-- System area: auth-only UI lives here -->
+    <!-- Account area only (no redundant nav) -->
     <div class="sys" role="navigation" aria-label="Account">
-      <!-- Logged-out state -->
       <a class="chip ghost show-logged-out" href="/login" aria-label="Log in">Login</a>
-
-      <!-- Logged-in state (hidden by default; see CSS below) -->
       <a class="chip show-logged-in" href="/account" aria-label="Account">
         <span class="avatar" aria-hidden="true"></span>
         <span class="label">Account</span>
       </a>
     </div>
-  </div>
-</header>
-<body>
-<header class="header">
-  <div class="container nav">
-	<div class="brand">
-  		<img class="logo" src="/assets/logo-badge.svg" alt="Offband logo" width="18" height="18">
-  		Offband
-	</div>
-    <nav>
-      <a href="/">Home</a>
-      <a href="/about.html">About</a>
-      <a href="/blog/">Blog</a>
-    </nav>
   </div>
 </header>
 
@@ -44,8 +59,8 @@
     <section>
       <div class="hero">
         <h1>Offband</h1>
-        <p>A security-first community lab. We publish homelab notes, OSINT experiments, and small tools — so you can replicate or adapt them yourself.</p>
-        <p>Baseline Nginx on Linode. HTTPS via Let’s Encrypt. Deploys from GitHub.</p>
+        <p class="lead">Hands-on security notes and small operator tools — built in public.</p>
+        <p class="sub">Homelab hardening, OSINT workflows, and repeatable setups you can clone, adapt, and ship.</p>
         <div class="actions">
           <a class="btn primary" href="/blog/">Read the blog</a>
           <a class="btn" href="/about.html">About the project</a>
@@ -75,17 +90,9 @@
   </div>
 </main>
 
+<!-- JS (externalized for strict CSP) -->
 <script src="/assets/sidebar.js" defer></script>
-<script>
-  fetch('/components/sidebar.html')
-    .then(r=>r.text())
-    .then(html=>{
-      const sb = document.getElementById('sb');
-      sb.innerHTML = '<h3>Navigate</h3>' + html;   // ← add a label
-      window.__initSidebarTree(sb);
-      window.__highlightActive(sb);
-    });
-  document.getElementById('y').textContent = (new Date).getFullYear();
-</script>
+<script src="/assets/sidebar-init.js" defer></script>
+<script src="/assets/year.js" defer></script>
 </body>
 </html>
