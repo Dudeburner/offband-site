@@ -147,3 +147,24 @@ aside.sidebar{
 /* active link highlight */
 .tree a.active{color:var(--accent);font-weight:600}
 .tree .row.active{background:var(--bg-soft)}
+
+/* --- Sidebar polish --- */
+.sidebar h3{margin:.2rem 0 .4rem;font-size:.95rem;color:var(--muted);font-weight:600;letter-spacing:.02em}
+.tree{--indent:14px}
+.tree .row{padding:6px 8px;border-radius:8px}
+.tree .row:hover{background:rgba(255,255,255,.03)}
+.tree .twisty{width:18px;text-align:center;opacity:.8}
+.tree .folder > ul{margin-left:var(--indent);padding-left:10px;border-left:1px dashed var(--ring)}
+.tree a{color:var(--text);opacity:.92}
+.tree a:hover{color:var(--accent)}
+.tree a.active{color:var(--accent);font-weight:600}
+.tree .row.active{background:rgba(123,209,255,.08)}
+/* subtle bullets for leaf items */
+.tree li:not(.folder) .row::before{
+  content:"•"; color:var(--ring); margin-right:8px; font-size:.8rem;
+}
+/* make the sidebar a bit denser on desktop */
+@media(min-width:860px){
+  aside.sidebar{padding:10px}
+  .tree .row{padding:5px 8px}
+}

@@ -45,7 +45,7 @@
     .then(r=>r.text())
     .then(html=>{
       const sb = document.getElementById('sb');
-      sb.innerHTML = html;
+      sb.innerHTML = '<h3>Navigate</h3>' + html;   // ← add a label
       window.__initSidebarTree(sb);
       window.__highlightActive(sb);
     });
