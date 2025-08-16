@@ -14,7 +14,15 @@ homelab notes, hardening guides, OSINT/pentest writeups, and small tools.</p>
 <p><em>Note:</em> This site is built entirely on a tiny Linode VM, deployed automatically from GitHub.</p>
 
 <h2>Contact</h2>
-<p>Email: <a href="mailto:contact@offband.dev">contact@offband.dev</a></p>
+<!--EMAIL_START-->
+<p>Email: <span id="e"><!-- filled at runtime --></span></p>
+<script>(function(){
+  const parts = ["Y29udGFjdA==","b2ZmYmFuZA==","ZGV2"];
+  const addr = atob(parts[0])+"@"+atob(parts[1])+"."+atob(parts[2]);
+  const el = document.getElementById("e");
+  el.innerHTML = '<a href="mailto:'+addr+'">'+addr+'</a>';
+})();</script>
+<!--EMAIL_END-->
 
 <footer>© <span id="y"></span> Offband</footer>
 <script>document.getElementById('y').textContent=(new Date).getFullYear()</script>
