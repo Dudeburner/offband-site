@@ -1,2 +1,64 @@
-<!doctype html><meta charset="utf-8"><title>404</title>
-<h1>404</h1><p>Not found.</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Not found • Offband</title>
+  <meta name="description" content="The page you were looking for doesn’t exist. Explore Offband’s blog, tools, and writeups instead.">
+  <link rel="stylesheet" href="/assets/site.css">
+  <meta name="theme-color" content="#39FF14">
+</head>
+<body>
+<header class="header">
+  <div class="container nav">
+    <div class="brand"><span class="dot"></span> Offband</div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/about.html">About</a>
+      <a href="/blog/">Blog</a>
+    </nav>
+  </div>
+</header>
+
+<main class="main">
+  <div class="container layout">
+    <aside class="sidebar" id="sb"></aside>
+
+    <section>
+      <div class="hero">
+        <h1>Page not found</h1>
+        <p>The path you tried doesn’t exist. Try the links below or go back home.</p>
+        <div class="actions">
+          <a class="btn primary" href="/">Go home</a>
+          <a class="btn" href="/blog/">Read the blog</a>
+        </div>
+      </div>
+
+      <section class="card">
+        <h2>Quick links</h2>
+        <ul>
+          <li><a href="/about.html">About Offband</a></li>
+          <li><a href="/blog/">Blog index</a></li>
+        </ul>
+      </section>
+
+      <div class="hr"></div>
+      <footer>© <span id="y"></span> Offband</footer>
+    </section>
+  </div>
+</main>
+
+<script src="/assets/sidebar.js" defer></script>
+<script>
+  fetch('/components/sidebar.html')
+    .then(r => r.text())
+    .then(html => {
+      const sb = document.getElementById('sb');
+      sb.innerHTML = '<h3>Navigate</h3>' + html;
+      window.__initSidebarTree(sb);
+      window.__highlightActive(sb);
+    });
+  document.getElementById('y').textContent = (new Date).getFullYear();
+</script>
+</body>
+</html>
