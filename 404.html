@@ -63,16 +63,7 @@
 </main>
 
 <script src="/assets/sidebar.js" defer></script>
-<script>
-  fetch('/components/sidebar.html')
-    .then(r => r.text())
-    .then(html => {
-      const sb = document.getElementById('sb');
-      sb.innerHTML = '<h3>Navigate</h3>' + html;
-      window.__initSidebarTree(sb);
-      window.__highlightActive(sb);
-    });
-  document.getElementById('y').textContent = (new Date).getFullYear();
-</script>
+<script src="/assets/sidebar-init.js" defer></script>
+<script src="/assets/year.js" defer></script>
 </body>
 </html>
