@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Offband · Learn. Build. Defend.</title>
+  <title>Offband · Security-first community lab</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <!-- Favicon & Theme -->
@@ -17,78 +17,79 @@
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Offband">
   <meta property="og:title" content="Offband — Security-first community lab">
-  <meta property="og:description" content="Homelab notes, OSINT experiments, and small tools — built in public.">
+  <meta property="og:description" content="Operator-grade writeups, homelab notes, and security experiments.">
   <meta property="og:url" content="https://offband.dev/">
   <meta property="og:image" content="https://offband.dev/assets/og-512.png">
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Offband — Security-first community lab">
-  <meta name="twitter:description" content="Homelab notes, OSINT experiments, and small tools — built in public.">
+  <meta name="twitter:description" content="Operator-grade writeups, homelab notes, and security experiments.">
   <meta name="twitter:image" content="https://offband.dev/assets/og-512.png">
 
   <!-- Styles -->
   <link rel="stylesheet" href="/assets/site.css">
 </head>
 <body>
+  <!-- Top bar -->
+  <header class="topbar">
+    <a href="/" class="brand">
+      <img src="/assets/logo.svg" alt="Offband logo" class="logo">
+      <span class="brand-name">Offband</span>
+    </a>
+  </header>
+
   <div class="layout">
     <!-- Sidebar -->
     <aside class="sidebar-shell">
-      <div data-include="/components/sidebar.html"></div>
+      <div data-include="/components/sidebar.html?v=2025-08-17d"></div>
     </aside>
 
-    <!-- Main content -->
+    <!-- Main -->
     <main class="content container">
+      <h1>Writeups</h1>
+      <p class="muted">Operator-grade tutorials, case studies, and notes. No fluff.</p>
 
-      <!-- HERO -->
-      <section class="hero">
-        <h1>Offband</h1>
-        <p class="muted">Learn. Build. Defend. Operator-grade writeups and a live security dashboard.</p>
-        <div class="cta">
-          <a class="btn primary" href="/writeups/">Read writeups</a>
-          <a class="btn" href="/security/">See dashboard</a>
-        </div>
-      </section>
-
-      <!-- FEATURED -->
-      <section aria-labelledby="featured-title" class="mt-2">
+      <!-- Featured -->
+      <section class="mt-2" aria-labelledby="featured-title">
         <h2 id="featured-title">Featured</h2>
         <div class="cards">
           <article class="card">
-            <h3><a href="/writeups/">Writeups</a></h3>
-            <p class="muted">Tutorials and case studies. No fluff.</p>
+            <h3><a href="/security/logs/2025-08-17-hardening-web-server.html">Hardening web server for deployment</a></h3>
+            <p class="muted">End-to-end from baseline Ubuntu → Nginx → firewall → monitoring. Issues &amp; fixes included.</p>
           </article>
           <article class="card">
-            <h3><a href="/security/">Security Overview</a></h3>
-            <p class="muted">Snapshot of active defenses and recent probes.</p>
-          </article>
-          <article class="card">
-            <h3><a href="/security/logs/2025-08-17-hardening-web-server.html">Server hardening log</a></h3>
-            <p class="muted">What we did to get the box online and stable.</p>
+            <h3><a href="/writeups/posts/primer-structure-style.html">Primer — structure &amp; style</a></h3>
+            <p class="muted">Standards for future writeups: layout, headings, code blocks, and “issues &amp; fixes” blurts.</p>
           </article>
         </div>
       </section>
 
-      <!-- DASHBOARD PREVIEW -->
-      <section aria-labelledby="dash-title" class="mt-2">
-        <h2 id="dash-title">Dashboard preview</h2>
-        <ul>
-          <li>Active defenses: ON</li>
-          <li>Last probe blocked: today 14:32</li>
-          <li>Honeypot: idle</li>
+      <!-- All writeups -->
+      <section class="mt-2" aria-labelledby="all-title">
+        <h2 id="all-title">All writeups</h2>
+        <ul class="post-list">
+          <li>
+            <a href="/writeups/posts/primer-structure-style.html">Primer — structure &amp; style</a>
+            <span class="muted"> — framing for consistent technical notes</span>
+          </li>
+          <li>
+            <a href="/writeups/posts/static-deploy-rsync-nginx.html">Static deploy: rsync → Nginx (v0.1)</a>
+            <span class="muted"> — minimal, repeatable shipping without a CI behemoth</span>
+          </li>
+          <li>
+            <a href="/writeups/posts/nginx-rate-limits-sane-defaults.html">Nginx rate limits — sane defaults</a>
+            <span class="muted"> — per-IP buckets and bursts that don’t punish humans</span>
+          </li>
         </ul>
-        <p class="muted">Full details on the <a href="/security/">Security</a> page.</p>
       </section>
 
-      <!-- COMMUNITY HOOK -->
-      <section aria-labelledby="connect-title" class="mt-2">
-        <h2 id="connect-title">Connect</h2>
-        <p class="muted">Want to learn along? Keep it tight and technical.</p>
-        <div class="cta">
-          <a class="btn" href="/connect/">About &amp; contact</a>
-        </div>
+      <!-- Notes -->
+      <section class="mt-2">
+        <p class="small muted">
+          Tip: “Logs” live under <a href="/security/logs/">Security → Logs</a> for deep operational captures.
+        </p>
       </section>
-
     </main>
   </div>
 

@@ -1,19 +1,52 @@
-<!doctype html><html><head><meta charset="utf-8"><title>Security · Offband</title>
-<link rel="stylesheet" href="/assets/site.css"></head><body>
-<div data-include="/components/sidebar.html"></div>
-<main class="container">
-  <h1>Security</h1>
-  <nav class="subnav">
-    <a href="/security/" class="active">Overview</a>
-    <a href="/security/logs/">Logs</a>
-  </nav>
-  <section>
-    <p class="muted">Dashboard preview (stub):</p>
-    <ul>
-      <li>Active defenses: ON</li>
-      <li>Last probe blocked: today 14:32</li>
-      <li>Honeypot: idle</li>
-    </ul>
-  </section>
-</main>
-<script src="/assets/sidebar-init.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Security · Offband</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="canonical" href="https://offband.dev/security/">
+  <link rel="icon" type="image/svg+xml" href="/assets/logo-favicon.svg">
+  <link rel="alternate icon" type="image/png" href="/assets/og-512.png" sizes="512x512">
+  <meta name="theme-color" content="#39FF14">
+  <link rel="stylesheet" href="/assets/site.css">
+</head>
+<body>
+  <!-- Top bar -->
+  <header class="topbar">
+    <a href="/" class="brand">
+      <img src="/assets/logo.svg" alt="Offband logo" class="logo">
+      <span class="brand-name">Offband</span>
+    </a>
+  </header>
+
+  <div class="layout">
+    <!-- Sidebar -->
+    <aside class="sidebar-shell">
+      <div data-include="/components/sidebar.html?v=2025-08-17d"></div>
+    </aside>
+
+    <!-- Main -->
+    <main class="content container">
+      <h1>Security</h1>
+
+      <nav class="subnav" aria-label="Security sections">
+        <a href="/security/" class="active">Overview</a>
+        <a href="/security/logs/">Logs</a>
+      </nav>
+
+      <section>
+        <p class="muted">Snapshot of defenses and recent activity.</p>
+        <ul id="pulse">
+          <li>Active defenses: ON</li>
+          <li>Last probe blocked: today 14:32</li>
+          <li>Honeypot: idle</li>
+        </ul>
+        <p class="muted">Detailed notes live in <a href="/security/logs/">Logs</a>.</p>
+      </section>
+    </main>
+  </div>
+
+  <script src="/assets/include.js"></script>
+  <script src="/assets/sidebar-init.js"></script>
+</body>
+</html>
