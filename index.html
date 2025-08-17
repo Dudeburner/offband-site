@@ -50,44 +50,55 @@
   </div>
 </header>
 
-<main class="main">
-  <div class="container layout">
-    <!-- sidebar -->
-    <aside class="sidebar" id="sb"></aside>
+<main class="container">
+  <!-- HERO (keep your existing content if you like it) -->
+  <section class="hero">
+    <h1>Offband</h1>
+    <p class="muted">Learn. Build. Defend. Operator-grade writeups and a live security dashboard.</p>
+    <div class="cta">
+      <a class="btn" href="/writeups/">Read writeups</a>
+      <a class="btn" href="/security/">See dashboard</a>
+    </div>
+  </section>
 
-    <!-- main content -->
-    <section>
-      <div class="hero">
-        <h1>Offband</h1>
-        <p class="lead">Hands-on security notes and small operator tools — built in public.</p>
-        <p class="sub">Homelab hardening, OSINT workflows, and repeatable setups you can clone, adapt, and ship.</p>
-        <div class="actions">
-          <a class="btn primary" href="/blog/">Read the blog</a>
-          <a class="btn" href="/about.html">About the project</a>
-        </div>
-      </div>
+  <!-- FEATURED -->
+  <section aria-labelledby="featured-title" style="margin-top:2rem">
+    <h2 id="featured-title">Featured</h2>
+    <div class="cards">
+      <article class="card">
+        <h3><a href="/writeups/">Writeups</a></h3>
+        <p class="muted">Tutorials and case studies. No fluff.</p>
+      </article>
+      <article class="card">
+        <h3><a href="/security/">Security Overview</a></h3>
+        <p class="muted">Snapshot of active defenses and recent probes.</p>
+      </article>
+      <article class="card">
+        <h3><a href="/security/logs/2025-08-17-hardening-web-server.html">Server hardening log</a></h3>
+        <p class="muted">What we did today to get the box online and stable.</p>
+      </article>
+    </div>
+  </section>
 
-      <section class="grid">
-        <article class="card">
-          <h2>What’s here</h2>
-          <ul>
-            <li>Notes + writeups (homelab, hardening, OSINT/pentest)</li>
-            <li>Tiny tools and templates (bash-first)</li>
-          </ul>
-        </article>
-        <article class="card">
-          <h2>What’s next</h2>
-          <ul>
-            <li>Site v1 blog post</li>
-            <li>Server hardening series</li>
-          </ul>
-        </article>
-      </section>
+  <!-- DASHBOARD PREVIEW (stub; later we wire real data) -->
+  <section aria-labelledby="dash-title" style="margin-top:2rem">
+    <h2 id="dash-title">Dashboard preview</h2>
+    <ul>
+      <li>Active defenses: ON</li>
+      <li>Last probe blocked: today 14:32</li>
+      <li>Honeypot: idle</li>
+    </ul>
+    <p class="muted">Full details on the <a href="/security/">Security</a> page.</p>
+  </section>
 
-      <div class="hr"></div>
-      <footer>© <span id="y"></span> Offband</footer>
-    </section>
-  </div>
+  <!-- COMMUNITY HOOK -->
+  <section aria-labelledby="connect-title" style="margin-top:2rem">
+    <h2 id="connect-title">Connect</h2>
+    <p class="muted">Want to learn along? Keep it tight and technical.</p>
+    <div class="cta">
+      <a class="btn" href="/connect/">About & contact</a>
+    </div>
+  </section>
 </main>
 
 <!-- JS (externalized for strict CSP) -->

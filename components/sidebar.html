@@ -1,44 +1,114 @@
-<nav aria-label="Site navigation">
+<nav class="sidebar" aria-label="Site navigation">
   <ul class="tree">
+    <!-- Home -->
     <li>
       <div class="row">
-        <span class="twisty" aria-hidden="true" style="visibility:hidden">•</span>
         <a href="/">Home</a>
       </div>
     </li>
 
-    <li class="folder" aria-expanded="true" data-open="true">
-      <div class="row" tabindex="0">
-        <button class="twisty" aria-label="Toggle section">▾</button>
-        <span>Pages</span>
+    <!-- Writeups -->
+    <li class="folder" data-open="true" aria-expanded="true">
+      <div class="row" tabindex="0" role="button" aria-label="Toggle Writeups">
+        <span class="twisty" aria-hidden="true">▾</span>
+        <span class="label">Writeups</span>
       </div>
       <ul>
-        <li><div class="row"><a href="/about.html">About</a></div></li>
-        <li><div class="row"><a href="/blog/">Blog</a></div></li>
-        <li><div class="row"><a class="muted" href="/status.html">Status (soon)</a></div></li>
+        <li><div class="row"><a href="/writeups/">All writeups</a></div></li>
+        <li><div class="row"><a href="/writeups/posts/coming-soon.html">Coming soon…</a></div></li>
       </ul>
     </li>
 
-    <li class="folder" aria-expanded="false">
-      <div class="row" tabindex="0">
-        <button class="twisty" aria-label="Toggle section">▸</button>
-        <span>Posts</span>
+    <!-- Security -->
+    <li class="folder" data-open="true" aria-expanded="true">
+      <div class="row" tabindex="0" role="button" aria-label="Toggle Security">
+        <span class="twisty" aria-hidden="true">▾</span>
+        <span class="label">Security</span>
       </div>
       <ul>
-        <li><div class="row"><a href="/blog/posts/coming-soon.html">Coming soon…</a></div></li>
-        <!-- Add more post links as you publish -->
+        <li><div class="row"><a href="/security/">Overview</a></div></li>
+        <li><div class="row"><a href="/security/logs/">Logs</a></div></li>
       </ul>
     </li>
 
-    <li class="folder" aria-expanded="false">
-      <div class="row" tabindex="0">
-        <button class="twisty" aria-label="Toggle section">▸</button>
-        <span>Tools</span>
+    <!-- Connect -->
+    <li class="folder" data-open="true" aria-expanded="true">
+      <div class="row" tabindex="0" role="button" aria-label="Toggle Connect">
+        <span class="twisty" aria-hidden="true">▾</span>
+        <span class="label">Connect</span>
       </div>
       <ul>
-        <li><div class="row"><span class="muted">Note generator (soon)</span></div></li>
-        <li><div class="row"><span class="muted">Homelab hardening (soon)</span></div></li>
+        <li><div class="row"><a href="/connect/">About</a></div></li>
+        <li><div class="row"><span class="muted">Contact (soon)</span></div></li>
       </ul>
     </li>
   </ul>
+
+  <script>
+  (function () {
+    const STORAGE_KEY = 'sidebar.v1';
+    const nav = document.currentScript.closest('nav.sidebar') || document.currentScript.parentElement;
+    if (!nav) return;
+
+    // Restore expanded state (index-based; stable as long as folder order is stable)
+    try {
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+      nav.querySelectorAll('.folder').forEach((li, idx) => {
+        const open = (saved[idx] !== undefined) ? !!saved[idx] : li.hasAttribute('data-open');
+        setOpen(li, open);
+      });
+    } catch (_) {}
+
+    function persist() {
+      const state = {};
+      nav.querySelectorAll('.folder').forEach((li, idx) => {
+        state[idx] = li.getAttribute('aria-expanded') === 'true';
+      });
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (_) {}
+    }
+
+    function setOpen(li, open) {
+      li.setAttribute('aria-expanded', open ? 'true' : 'false');
+      li.dataset.open = open ? 'true' : 'false';
+      const twisty = li.querySelector('.twisty');
+      if (twisty) twisty.textContent = open ? '▾' : '▸';
+    }
+
+    function toggle(li) {
+      const next = li.getAttribute('aria-expanded') !== 'true';
+      setOpen(li, next);
+      persist();
+    }
+
+    // Click anywhere on the folder row (not just the icon)
+    nav.querySelectorAll('.folder > .row').forEach((row) => {
+      const li = row.parentElement;
+
+      row.addEventListener('click', (e) => {
+        // Let anchor clicks inside the row pass through
+        if (e.target && e.target.tagName === 'A') return;
+        toggle(li);
+      });
+
+      row.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(li); }
+        if (e.key === 'ArrowRight') { setOpen(li, true); persist(); }
+        if (e.key === 'ArrowLeft')  { setOpen(li, false); persist(); }
+      });
+    });
+
+    // Active link highlight (fallback if your existing init doesn’t do it)
+    const norm = (p) => (p || '/').replace(/\/+$/, '/') || '/';
+    const here = norm(location.pathname);
+
+    nav.querySelectorAll('a[href]').forEach((a) => {
+      const href = norm(a.getAttribute('href'));
+      if (here === href || (href !== '/' && here.startsWith(href))) {
+        a.classList.add('active');
+        const parent = a.closest('.folder');
+        if (parent) setOpen(parent, true);
+      }
+    });
+  })();
+  </script>
 </nav>

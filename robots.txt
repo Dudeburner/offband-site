@@ -1,3 +1,11 @@
+# Offband robots.txt
 User-agent: *
+Disallow: /security/logs/
+
+Disallow: /templates/
+
+Disallow: /tools/
+
 Allow: /
+
 Sitemap: https://offband.dev/sitemap.xml

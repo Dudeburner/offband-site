@@ -1,7 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://offband.dev/</loc></url>
-  <url><loc>https://offband.dev/about.html</loc></url>
-  <url><loc>https://offband.dev/blog/</loc></url>
-  <url><loc>https://offband.dev/blog/posts/coming-soon.html</loc></url>
+
+  <!-- Writeups -->
+  <url><loc>https://offband.dev/writeups/</loc></url>
+
+  <!-- Security -->
+  <url><loc>https://offband.dev/security/</loc></url>
+
+  <!-- Logs index is allowed to exist but we've disallowed crawling it in robots -->
+  <url><loc>https://offband.dev/security/logs/</loc></url>
+
+  <!-- Connect -->
+  <url><loc>https://offband.dev/connect/</loc></url>
 </urlset>

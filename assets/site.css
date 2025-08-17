@@ -210,3 +210,22 @@ aside.sidebar{
   aside.sidebar{padding:10px}
   .tree .row{padding:5px 8px}
 }
+
+/* Sidebar tree affordances */
+.sidebar .tree { list-style: none; margin: 0; padding: 0; }
+.sidebar .tree .row { display: flex; align-items: center; gap: .5rem; padding: .35rem .5rem; cursor: pointer; }
+.sidebar .tree .row a { flex: 1; }
+.sidebar .tree .row:focus { outline: 1px dashed currentColor; outline-offset: 2px; }
+.sidebar .twisty { width: 1rem; text-align: center; opacity: .7; }
+.folder[aria-expanded="false"] > ul { display: none; }
+/* Active link */
+.sidebar a.active { font-weight: 600; }
+/* Subnav (Security tabs) */
+.subnav { margin: 1rem 0; display: flex; gap: 1rem; }
+.subnav a { text-decoration: none; opacity: .7; }
+.subnav a.active { opacity: 1; border-bottom: 2px solid currentColor; }
+/* Simple cards for homepage sections */
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; }
+.card { padding: 1rem; border: 1px solid rgba(255,255,255,.12); border-radius: 8px; }
+.card h3 { margin: 0 0 .5rem 0; }
+.muted { opacity: .7; font-size: .95em; }
