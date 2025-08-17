@@ -50,7 +50,7 @@
     const nav = document.currentScript.closest('nav.sidebar') || document.currentScript.parentElement;
     if (!nav) return;
 
-    // Restore expanded state (index-based; stable as long as folder order is stable)
+    // Restore expanded state
     try {
       const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
       nav.querySelectorAll('.folder').forEach((li, idx) => {
@@ -80,12 +80,12 @@
       persist();
     }
 
-    // Click anywhere on the folder row (not just the icon)
+    // Make the whole row clickable
     nav.querySelectorAll('.folder > .row').forEach((row) => {
       const li = row.parentElement;
 
       row.addEventListener('click', (e) => {
-        // Let anchor clicks inside the row pass through
+        // Allow anchor clicks inside row to pass through
         if (e.target && e.target.tagName === 'A') return;
         toggle(li);
       });
@@ -97,7 +97,7 @@
       });
     });
 
-    // Active link highlight (fallback if your existing init doesn’t do it)
+    // Highlight active link
     const norm = (p) => (p || '/').replace(/\/+$/, '/') || '/';
     const here = norm(location.pathname);
 
