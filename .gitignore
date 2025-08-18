@@ -1,12 +1,12 @@
 # macOS Finder
 .DS_Store
 
-# Editor/OS temp
+# Editors/OS
 *.swp
 *.swo
 *~
 .idea/
 .vscode/
 
-# Local/dev scripts
+# Local/dev scripts (keep ops tools private)
 *.sh
