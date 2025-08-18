@@ -45,12 +45,17 @@ help:
 
 # --------- Deploy ---------
 .PHONY: push
+.PHONY: push
 push:
+	@read -p "WARNING: This will push to GitHub and trigger a live deploy. Continue? (y/n) " ans; \
+	if [ "$$ans" != "y" ]; then \
+	  echo "✗ push aborted"; \
+	  exit 1; \
+	fi
 	@git add -A
 	@git commit -m "site update" || echo "✓ nothing to commit"
 	@git push origin main
 	@echo "✓ pushed to GitHub (deployment will follow)"
-
 # --------- Local preview ---------
 .PHONY: serve
 serve:
