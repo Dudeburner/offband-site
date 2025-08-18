@@ -303,3 +303,35 @@ footer{ margin-top:1.5rem; color:var(--muted); }
 .notfound-hero h1{ font-size:2rem; margin-bottom:.75rem; }
 .notfound-hero p{ margin-bottom:1.25rem; color:var(--muted); }
 .notfound-hero .actions{ display:flex; justify-content:center; gap:.75rem; flex-wrap:wrap; }
+
+/* --- Trim redundant top brand/badge on pages that have a hero --- */
+.brandbar,
+.site-top,
+.header-min,
+.nav-top,
+.logo-min {
+  display: none !important;
+}
+
+/* Hero */
+.card.hero { padding: 1.25rem 1.25rem 1rem; }
+.brand-line { display: flex; align-items: center; gap: .6rem; }
+.logo-badge { border-radius: .5rem; background: var(--panel); padding: .4rem; }
+.hero-title { margin: 0; }
+.cta-row { display: flex; gap: .75rem; margin-top: .75rem; }
+
+/* Lists & tags */
+.link-list { margin: .5rem 0 0; padding-left: 1rem; }
+.link-list li { margin: .25rem 0; }
+.tag.new { font-size: .75rem; padding: .1rem .4rem; border-radius: .35rem;
+  background: color-mix(in srgb, var(--accent) 20%, transparent);
+  color: var(--accent); }
+
+/* Grid */
+.grid { display: grid; }
+.grid-2 { grid-template-columns: repeat(2, minmax(0,1fr)); }
+.gap { gap: .9rem; }
+.card-link { text-decoration: none; }
+
+/* Keep content centered, sidebar left */
+.main { max-width: 900px; margin: 0 auto; }

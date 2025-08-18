@@ -37,66 +37,46 @@
 
     <!-- Main content -->
     <section class="content container">
-      <!-- Hero -->
-      <section class="hero center" aria-labelledby="brand-hero">
-        <a class="brand-badge" href="/" aria-label="Offband home">
-          <img class="badge-img" src="/assets/logo-badge.svg?v=2025-08-18f" alt="">
-          <span class="brand-text" id="brand-hero">Offband</span>
-        </a>
-        <p class="muted">Hands-on security notes and small operator tools. Built in public.</p>
-        <div class="actions" role="group" aria-label="Primary actions">
-          <a class="btn" href="/writeups/">Read writeups</a>
-          <a class="btn ghost" href="/security/">See dashboard</a>
-        </div>
-      </section>
+		<!-- HERO -->
+		<section class="card hero">
+		  <div class="brand-line">
+		    <img src="/assets/logo-badge.svg" alt="" class="logo-badge" width="28" height="28" />
+		    <h1 class="hero-title">Offband</h1>
+		  </div>
+		  <p class="muted">
+		    Hands‑on security notes and small operator tools. Built in public.
+		  </p>
+		  <div class="cta-row">
+		    <a class="btn btn-primary" href="/writeups/">Read writeups</a>
+		    <a class="btn btn-ghost" href="/security/">See dashboard</a>
+		  </div>
+		</section>
 
-      <!-- What's new -->
-      <section class="mt-2" aria-labelledby="new-title">
-        <h2 id="new-title">What’s new</h2>
-        <ul class="new-list">
-          <li>
-            <a href="/writeups/posts/primer-structure-style.html">Primer — structure &amp; style</a>
-            <span class="badge">new</span>
-          </li>
-          <li>
-            <a href="/security/logs/2025-08-17-hardening-web-server.html">Hardening web server for deployment</a>
-          </li>
-        </ul>
-      </section>
+		<!-- WHAT'S NEW (single list, no duplicate cards) -->
+		<section class="section">
+		  <h2 class="h2">What’s new</h2>
+		  <ul class="link-list">
+		    <li><a href="/writeups/primer-structure-style.html">Primer — structure &amp; style</a> <span class="tag new">new</span></li>
+		    <li><a href="/writeups/hardening-web-server.html">Hardening web server for deployment</a></li>
+		  </ul>
+		</section>
 
-      <!-- What’s here -->
-      <section class="mt-2" aria-labelledby="whats-here">
-        <h2 id="whats-here">What’s here</h2>
-        <div class="cards">
-          <article class="card">
-            <h3><a href="/writeups/">Writeups</a></h3>
-            <p class="muted">Operator-grade tutorials and case studies.</p>
-          </article>
-          <article class="card">
-            <h3><a href="/security/">Security overview</a></h3>
-            <p class="muted">Snapshot of defenses and recent events.</p>
-          </article>
-          <article class="card">
-            <h3><a href="/security/logs/">Server hardening log</a></h3>
-            <p class="muted">Everything we did to get the box online and stable.</p>
-          </article>
-        </div>
-      </section>
+		<!-- EXPLORE (one clean row) -->
+		<section class="grid grid-2 gap">
+		  <a class="card card-link" href="/writeups/">
+		    <h3 class="h3">Writeups</h3>
+		    <p class="muted">Operator‑grade tutorials and case studies.</p>
+		  </a>
 
-      <!-- Featured -->
-      <section class="mt-2" aria-labelledby="featured-title">
-        <h2 id="featured-title">Featured</h2>
-        <div class="cards">
-          <article class="card">
-            <h3><a href="/writeups/posts/primer-structure-style.html">Primer — structure &amp; style</a></h3>
-            <p class="muted">Standards for writeups: layout, headings, code blocks, and “issues &amp; fixes”.</p>
-          </article>
-          <article class="card">
-            <h3><a href="/security/logs/2025-08-17-hardening-web-server.html">Hardening web server for deployment</a></h3>
-            <p class="muted">Ubuntu → Nginx → firewall → monitoring. End to end.</p>
-          </article>
-        </div>
-      </section>
+		  <a class="card card-link" href="/security/">
+		    <h3 class="h3">Security</h3>
+		    <p class="muted">Snapshot of defenses and recent activity.</p>
+		  </a>
+		</section>
+
+		<footer class="footer-note">
+		  <small>© Offband • <a href="/security.txt">security.txt</a> <a href="/connect/">contact</a></small>
+		</footer>
 
       <div data-include="/components/footer.html?v=2025-08-18f"></div>
     </section>
