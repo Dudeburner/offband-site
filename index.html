@@ -2,39 +2,50 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Offband · Security-first community lab</title>
+  <title>Offband · Learn. Build. Defend.</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <!-- Favicon & Theme -->
-  <link rel="icon" type="image/svg+xml" href="/assets/logo-favicon.svg">
+  <link rel="icon" type="image/svg+xml" href="/assets/logo-badge.svg">
   <link rel="alternate icon" type="image/png" href="/assets/og-512.png" sizes="512x512">
   <meta name="theme-color" content="#39FF14">
 
   <!-- Canonical -->
   <link rel="canonical" href="https://offband.dev/">
 
-  <!-- Open Graph -->
+  <!-- OG/Twitter -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Offband">
-  <meta property="og:title" content="Offband — Security-first community lab">
-  <meta property="og:description" content="Operator-grade writeups, homelab notes, and security experiments.">
+  <meta property="og:title" content="Offband — Learn. Build. Defend.">
+  <meta property="og:description" content="Easy to follow writeups and a live security dashboard. Built to be transparent and educational.">
   <meta property="og:url" content="https://offband.dev/">
   <meta property="og:image" content="https://offband.dev/assets/og-512.png">
-
-  <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Offband — Security-first community lab">
-  <meta name="twitter:description" content="Operator-grade writeups, homelab notes, and security experiments.">
-  <meta name="twitter:image" content="https://offband.dev/assets/og-512.png">
 
-  <!-- Styles -->
   <link rel="stylesheet" href="/assets/site.css">
+
+  <!-- Page-local polish to keep the badge tight and centered -->
+  <style>
+    .hero--landing{ text-align:center; margin:.5rem 0 1.25rem; }
+    .brand-badge{
+      display:inline-flex; align-items:center; gap:.75rem;
+      padding:.55rem .9rem; border:1px solid var(--border);
+      border-radius:999px; background:rgba(255,255,255,.03);
+      text-decoration:none; color:var(--fg);
+    }
+    .brand-badge:hover{ text-decoration:none; background:rgba(255,255,255,.05); }
+    .brand-badge .badge-img{ width:32px; height:32px; display:block; border-radius:.35rem; }
+    .brand-badge .brand-text{ font-size:1.6rem; font-weight:700; letter-spacing:.2px; }
+    .hero--landing p{ margin:.6rem 0 .9rem; }
+    .hero--landing .actions{ display:flex; justify-content:center; gap:.75rem; flex-wrap:wrap; }
+    @media (max-width:480px){ .brand-badge .brand-text{ font-size:1.35rem; } .brand-badge .badge-img{ width:28px; height:28px; } }
+  </style>
 </head>
 <body>
   <!-- Top bar -->
   <header class="topbar">
     <a href="/" class="brand">
-      <img src="/assets/logo-badge.svg" alt="Offband logo" class="logo">
+      <img src="/assets/logo-badge.svg" alt="Offband logo" class="logo" width="18" height="18">
       <span class="brand-name">Offband</span>
     </a>
   </header>
@@ -42,58 +53,87 @@
   <div class="layout">
     <!-- Sidebar -->
     <aside class="sidebar-shell">
-      <div data-include="/components/sidebar.html?v=2025-08-17d"></div>
+      <div data-include="/components/sidebar.html?v=2025-08-17e"></div>
     </aside>
 
     <!-- Main -->
     <main class="content container">
-      <h1>Writeups</h1>
-      <p class="muted">Operator-grade tutorials, case studies, and notes. No fluff.</p>
+      <!-- DISTINCT LANDING HERO -->
+      <section class="hero hero--landing" aria-labelledby="brand-hero">
+        <a class="brand-badge" href="/" aria-label="Offband home">
+          <img class="badge-img" src="/assets/logo-badge.svg" alt="">
+          <span class="brand-text" id="brand-hero">Offband</span>
+        </a>
+        <p class="muted">Hands-on security notes and small operator tools. Built in public.</p>
+        <div class="actions" role="group" aria-label="Primary actions">
+          <a class="btn" href="/writeups/">Read writeups</a>
+          <a class="btn ghost" href="/security/">See dashboard</a>
+        </div>
+      </section>
 
-      <!-- Featured -->
-      <section class="mt-2" aria-labelledby="featured-title">
-        <h2 id="featured-title">Featured</h2>
+      <!-- What's new -->
+      <section class="mt-2" aria-labelledby="new-title">
+        <h2 id="new-title">What’s new</h2>
+        <ul class="new-list">
+          <li><a href="/writeups/posts/primer-structure-style.html">Primer — structure &amp; style</a> <span class="badge">new</span></li>
+          <li><a href="/security/logs/2025-08-17-hardening-web-server.html">Hardening web server for deployment</a></li>
+        </ul>
+      </section>
+
+      <!-- What’s here -->
+      <section class="mt-2" aria-labelledby="whats-here">
+        <h2 id="whats-here">What’s here</h2>
         <div class="cards">
           <article class="card">
-            <h3><a href="/security/logs/2025-08-17-hardening-web-server.html">Hardening web server for deployment</a></h3>
-            <p class="muted">End-to-end from baseline Ubuntu → Nginx → firewall → monitoring. Issues &amp; fixes included.</p>
+            <h3><a href="/writeups/">Writeups</a></h3>
+            <p class="muted">Tutorials and case studies. Real life examples of purpose built security.</p>
           </article>
           <article class="card">
-            <h3><a href="/writeups/posts/primer-structure-style.html">Primer — structure &amp; style</a></h3>
-            <p class="muted">Standards for future writeups: layout, headings, code blocks, and “issues &amp; fixes” blurts.</p>
+            <h3><a href="/security/">Security overview</a></h3>
+            <p class="muted">Snapshot of our current defenses and recent attacks.</p>
+          </article>
+          <article class="card">
+            <h3><a href="/security/logs/">Server hardening log</a></h3>
+            <p class="muted">What we did to get the box online and stable.</p>
           </article>
         </div>
       </section>
 
-      <!-- All writeups -->
-      <section class="mt-2" aria-labelledby="all-title">
-        <h2 id="all-title">All writeups</h2>
-        <ul class="post-list">
-          <li>
-            <a href="/writeups/posts/primer-structure-style.html">Primer — structure &amp; style</a>
-            <span class="muted"> — framing for consistent technical notes</span>
-          </li>
-          <li>
-            <a href="/writeups/posts/static-deploy-rsync-nginx.html">Static deploy: rsync → Nginx (v0.1)</a>
-            <span class="muted"> — minimal, repeatable shipping without a CI behemoth</span>
-          </li>
-          <li>
-            <a href="/writeups/posts/nginx-rate-limits-sane-defaults.html">Nginx rate limits — sane defaults</a>
-            <span class="muted"> — per-IP buckets and bursts that don’t punish humans</span>
-          </li>
-        </ul>
+      <!-- Featured picks -->
+      <section class="mt-2" aria-labelledby="featured-title">
+        <h2 id="featured-title">Featured</h2>
+        <div class="cards">
+          <article class="card">
+            <h3><a href="/writeups/posts/primer-structure-style.html">Primer — structure &amp; style</a></h3>
+            <p class="muted">Standards for future writeups: layout, headings, code blocks, and “issues &amp; fixes”.</p>
+          </article>
+          <article class="card">
+            <h3><a href="/security/logs/2025-08-17-hardening-web-server.html">Hardening web server for deployment</a></h3>
+            <p class="muted">Ubuntu → Nginx → firewall → monitoring. End to end.</p>
+          </article>
+        </div>
       </section>
 
-      <!-- Notes -->
-      <section class="mt-2">
-        <p class="small muted">
-          Tip: “Logs” live under <a href="/security/logs/">Security → Logs</a> for deep operational captures.
-        </p>
+      <!-- Dashboard preview -->
+      <section class="mt-2" aria-labelledby="dash-title">
+        <h2 id="dash-title">Dashboard preview</h2>
+        <ul>
+          <li>Active defenses: <strong>ON</strong></li>
+          <li>Last probe blocked: <strong>today 14:32</strong></li>
+          <li>Honeypot: <strong>idle</strong></li>
+        </ul>
+        <p class="small muted">Full details on the <a href="/security/">Security</a> page.</p>
+      </section>
+
+      <!-- Connect -->
+      <section class="mt-2" aria-labelledby="connect-title">
+        <h2 id="connect-title">Connect</h2>
+        <p class="muted">Want to learn along? Keep it tight and technical.</p>
+        <a class="btn ghost" href="/connect/">About &amp; contact</a>
       </section>
     </main>
   </div>
 
-  <!-- Scripts -->
   <script src="/assets/include.js"></script>
   <script src="/assets/sidebar-init.js"></script>
 </body>
