@@ -1,10 +1,8 @@
 SHELL := /bin/bash
 .DEFAULT_GOAL := help
 
-# Optional: your existing push helper
 OFFBAND_PUSH   := $(HOME)/bin/offband-push.sh
 
-# Find operator scripts in common locations (private first)
 OFFBAND_CLI    := $(or $(wildcard $(HOME)/offband-tools/offband.sh),\
                        $(wildcard $(HOME)/bin/offband.sh),\
                        $(wildcard ./tools/offband.sh))
