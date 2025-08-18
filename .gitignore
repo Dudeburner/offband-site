@@ -7,3 +7,6 @@
 *~
 .idea/
 .vscode/
+
+# Local/dev scripts
+*.sh
