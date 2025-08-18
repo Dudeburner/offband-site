@@ -1,12 +1,25 @@
-# macOS Finder
+# macOS
 .DS_Store
 
-# Editors/OS
-*.swp
-*.swo
-*~
-.idea/
-.vscode/
+# Local tooling kept outside the public site
+tools/
+offband.sh
+offband-email.sh
 
-# Local/dev scripts (keep ops tools private)
-*.sh
+# Private/secret material (never commit)
+.gnupg/
+*.key
+*.pem
+*.p12
+*.pfx
+*.kdbx
+*.ovpn
+*.env
+.env.*
+secrets/
+**/secrets/
+
+# Keys directory: allow ONLY the public key
+keys/*
+!keys/offband.asc
+!keys/README.md

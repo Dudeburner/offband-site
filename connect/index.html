@@ -9,7 +9,7 @@
   <link rel="canonical" href="https://offband.dev/connect/">
 
   <!-- Brand / theme -->
-  <meta name="theme-color" content="#39FF14">
+  <meta name="theme-color" content="#5EEAFF">
   <link rel="icon" type="image/svg+xml" href="/assets/logo-badge.svg?v=2025-08-18f">
   <link rel="alternate icon" type="image/png" href="/assets/og-512.png" sizes="512x512">
 
@@ -54,8 +54,13 @@
         <article class="card">
           <h2>Contact</h2>
           <dl class="kv">
-            <dt>Email</dt>
-            <dd><span id="email"><!-- filled at runtime --></span></dd>
+            <!--EMAIL_START-->
+            <dt>Connect</dt>
+            <dd><span id="email-connect"><!-- filled at runtime --></span></dd>
+
+            <dt>Security</dt>
+            <dd><span id="email-security"><!-- filled at runtime --></span></dd>
+            <!--EMAIL_END-->
 
             <dt>security.txt</dt>
             <dd><a href="/.well-known/security.txt">/.well-known/security.txt</a></dd>
@@ -63,28 +68,53 @@
             <dt>Status</dt>
             <dd><a href="/security/">Security dashboard</a></dd>
           </dl>
-          <p class="small muted" style="margin-top:.75rem">We obfuscate the address on page load to reduce scraping.</p>
+          <p class="small muted" style="margin-top:.75rem">Addresses are obfuscated on page load to reduce scraping. Use our key below to encrypt sensitive mail.</p>
         </article>
 
         <article class="card">
-          <h2>Keys (optional)</h2>
-          <p class="muted">If you prefer encrypted mail, publish a PGP public key and link it here.</p>
+          <h2>Keys</h2>
+          <p class="muted">Send sensitive info encrypted to our PGP key. We accept PGP/MIME or inline armored messages.</p>
           <dl class="kv">
-            <dt>PGP</dt>
-            <dd><a href="/keys/offband.asc">/keys/offband.asc</a> <span class="muted">(placeholder)</span></dd>
+            <dt>PGP public key</dt>
+            <dd><a href="/keys/offband.asc">/keys/offband.asc</a></dd>
             <dt>Fingerprint</dt>
-            <dd><code>0000 0000 0000 0000 0000&nbsp;&nbsp;0000 0000 0000 0000 0000</code></dd>
+			<dd><code id="pgp-fpr">7E15 5919 FD8F BBD8 3D00&nbsp;&nbsp;5BD3 78E6 7D59 6991 329A</code></dd>
           </dl>
         </article>
+      </section>
 
-        <article class="card">
-          <h2>Presence</h2>
-          <p class="muted">Links are placeholders until accounts are public.</p>
-          <ul>
-            <li><a rel="me" href="https://github.com/offband">GitHub</a></li>
-            <li><a rel="me" href="https://infosec.exchange/@offband">Mastodon</a></li>
-          </ul>
-        </article>
+      <!-- Client-side encrypt widget -->
+      <section class="section" aria-labelledby="encrypt-title">
+        <h2 id="encrypt-title">Encrypt a message (client‑side)</h2>
+        <div class="card">
+          <p class="muted">Your message is encrypted in your browser using our public key. Nothing is sent anywhere until you do it.</p>
+          <label for="pgp-input" class="small muted">Plaintext</label>
+          <textarea id="pgp-input" rows="6" placeholder="Write your message…"></textarea>
+
+          <div class="row">
+            <div class="col">
+              <label for="pgp-to" class="small muted">Recipient</label>
+              <select id="pgp-to">
+                <option value="connect">connect@offband.dev</option>
+                <option value="security">security@offband.dev</option>
+              </select>
+            </div>
+            <div class="col">
+              <label class="small muted">&nbsp;</label>
+              <button id="pgp-encrypt" class="btn">Encrypt</button>
+            </div>
+          </div>
+
+          <label for="pgp-output" class="small muted">Encrypted (ASCII‑armored)</label>
+          <textarea id="pgp-output" rows="8" readonly placeholder="-----BEGIN PGP MESSAGE----- …"></textarea>
+
+          <div class="actions">
+            <button id="pgp-copy" class="btn ghost">Copy</button>
+            <a id="pgp-download" class="btn ghost" download="offband-encrypted.txt">Download</a>
+            <a id="pgp-mailto" class="btn" href="#">Open in email</a>
+          </div>
+          <p id="pgp-status" class="small muted" aria-live="polite"></p>
+        </div>
       </section>
 
       <section class="mt-2">
@@ -96,18 +126,23 @@
     </section>
   </main>
 
-  <!-- Email obfuscation + JSON-LD injection -->
+  <!-- Obfuscate emails + JSON-LD + PGP Encryptor -->
+  <!-- OpenPGP.js (load from CDN for now; later you can host a pinned copy at /assets/openpgp.min.js) -->
+  <script src="https://unpkg.com/openpgp@5.11.0/dist/openpgp.min.js" integrity="" crossorigin="anonymous" defer></script>
+
   <script>
   (function(){
-    // contact@offband.dev -> base64 parts
-    const parts = ["Y29udGFjdA==","b2ZmYmFuZA==","ZGV2"]; // contact, offband, dev
-    const addr  = atob(parts[0])+"@"+atob(parts[1])+"."+atob(parts[2]);
+    // ===== Email obfuscation =====
+    const cx = [ "Y29ubmVjdA==", "b2ZmYmFuZA==", "ZGV2" ]; // connect, offband, dev
+    const sx = [ "c2VjdXJpdHk=", "b2ZmYmFuZA==", "ZGV2" ]; // security, offband, dev
+    const addrConnect  = atob(cx[0]) + "@" + atob(cx[1]) + "." + atob(cx[2]);
+    const addrSecurity = atob(sx[0]) + "@" + atob(sx[1]) + "." + atob(sx[2]);
+    const ec = document.getElementById("email-connect");
+    const es = document.getElementById("email-security");
+    if (ec) ec.innerHTML = '<a href="mailto:'+addrConnect+'">'+addrConnect+'</a>';
+    if (es) es.innerHTML = '<a href="mailto:'+addrSecurity+'">'+addrSecurity+'</a>';
 
-    // Render obfuscated email
-    const el = document.getElementById("email");
-    if (el) el.innerHTML = '<a href="mailto:'+addr+'">'+addr+'</a>';
-
-    // JSON-LD Organization (email injected at runtime)
+    // ===== JSON-LD Organization + contact points =====
     const ld = {
       "@context": "https://schema.org",
       "@type": "Organization",
@@ -118,12 +153,91 @@
         "https://github.com/offband",
         "https://infosec.exchange/@offband"
       ],
-      "email": addr
+      "contactPoint": [
+        { "@type": "ContactPoint", "contactType": "customer support", "email": addrConnect },
+        { "@type": "ContactPoint", "contactType": "security",          "email": addrSecurity }
+      ]
     };
     const tag = document.createElement('script');
-    tag.type = "application/ld+json";
-    tag.text = JSON.stringify(ld);
+    tag.type = "application/ld+json"; tag.text = JSON.stringify(ld);
     document.head.appendChild(tag);
+
+    // ===== PGP Encryptor =====
+    const $ = sel => document.querySelector(sel);
+    const input  = $('#pgp-input');
+    const output = $('#pgp-output');
+    const encryptBtn = $('#pgp-encrypt');
+    const copyBtn    = $('#pgp-copy');
+    const dlBtn      = $('#pgp-download');
+    const mailtoBtn  = $('#pgp-mailto');
+    const toSelect   = $('#pgp-to');
+    const statusEl   = $('#pgp-status');
+
+    let publicKey;       // parsed OpenPGP key
+    let keyArmored = ''; // raw armored string
+
+    async function loadKey() {
+      try {
+        const res = await fetch('/keys/offband.asc', { cache: 'no-store' });
+        keyArmored = await res.text();
+        publicKey = await openpgp.readKey({ armoredKey: keyArmored });
+        // Try to extract fingerprint
+        try {
+          const fpr = publicKey.getFingerprint().toUpperCase().match(/.{1,4}/g).join(' ');
+          const f = document.getElementById('pgp-fpr'); if (f) f.textContent = fpr;
+        } catch(_) {}
+        ok('PGP key loaded.');
+      } catch (e) {
+        warn('Could not load /keys/offband.asc — encrypt box disabled until key is present.');
+        disableEncryptor(true);
+      }
+    }
+    function disableEncryptor(off) {
+      [input, encryptBtn, copyBtn, dlBtn, mailtoBtn].forEach(el => { if (el) el.disabled = !!off; });
+    }
+    function ok(msg){ if(statusEl){ statusEl.textContent = msg; statusEl.classList.remove('err'); } }
+    function warn(msg){ if(statusEl){ statusEl.textContent = msg; statusEl.classList.add('err'); } }
+
+    async function encrypt() {
+      const text = (input?.value || '').trim();
+      if (!text) { warn('Write something to encrypt.'); return; }
+      if (!publicKey) { warn('Public key not loaded.'); return; }
+      try {
+        const encrypted = await openpgp.encrypt({
+          message: await openpgp.createMessage({ text }),
+          encryptionKeys: publicKey,
+          config: { preferredCompressionAlgorithm: openpgp.enums.compression.zip }
+        });
+        output.value = encrypted;
+        ok('Encrypted.');
+        // prepare helpers
+        const blob = new Blob([encrypted], {type:'text/plain'});
+        dlBtn.href = URL.createObjectURL(blob);
+        const rcpt = toSelect?.value === 'security' ? addrSecurity : addrConnect;
+        const subject = encodeURIComponent('Encrypted message for Offband');
+        const body = encodeURIComponent(encrypted.slice(0, 6000)); // mailto body limits vary
+        mailtoBtn.href = `mailto:${rcpt}?subject=${subject}&body=${body}`;
+      } catch (e) {
+        console.error(e); warn('Encrypt failed.');
+      }
+    }
+
+    function copyOut() {
+      if (!output?.value) { warn('Nothing to copy.'); return; }
+      output.select(); document.execCommand('copy');
+      ok('Copied to clipboard.');
+    }
+
+    // Wire up once OpenPGP is available
+    window.addEventListener('load', () => {
+      if (typeof openpgp === 'undefined') {
+        warn('OpenPGP library not loaded. Check network/CSP.'); disableEncryptor(true); return;
+      }
+      disableEncryptor(false);
+      loadKey();
+      encryptBtn?.addEventListener('click', encrypt);
+      copyBtn?.addEventListener('click', copyOut);
+    });
   })();
   </script>
 
