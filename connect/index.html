@@ -1,82 +1,134 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>About Offband</title>
-  <meta name="description" content="Learn the mission behind Offband: a security-first community lab for practical notes, tools, and open writeups.">
-  <link rel="stylesheet" href="/assets/site.css">
-  <link rel="icon" type="image/svg+xml" href="/assets/logo-favicon.svg">
+  <meta charset="utf-8">
+  <title>About & Contact · Offband</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta name="description" content="Who runs Offband, how to reach us, and where to find keys and policies.">
+  <link rel="canonical" href="https://offband.dev/connect/">
+
+  <!-- Brand / theme -->
+  <meta name="theme-color" content="#39FF14">
+  <link rel="icon" type="image/svg+xml" href="/assets/logo-badge.svg?v=2025-08-18f">
   <link rel="alternate icon" type="image/png" href="/assets/og-512.png" sizes="512x512">
-  <!-- Open Graph -->
+
+  <!-- Social -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Offband">
-  <meta property="og:title" content="Offband — Security-first community lab">
-  <meta property="og:description" content="Homelab notes, OSINT experiments, and small tools — built in public.">
-  <meta property="og:url" content="https://offband.dev/">
+  <meta property="og:title" content="About & Contact — Offband">
+  <meta property="og:description" content="Who runs Offband, how to reach us, and where to find keys and policies.">
+  <meta property="og:url" content="https://offband.dev/connect/">
   <meta property="og:image" content="https://offband.dev/assets/og-512.png">
-
-  <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Offband — Security-first community lab">
-  <meta name="twitter:description" content="Homelab notes, OSINT experiments, and small tools — built in public.">
-  <meta name="twitter:image" content="https://offband.dev/assets/og-512.png">
 
-  <!-- Theme -->
-  <meta name="theme-color" content="#39FF14">
-
-  <!-- Stylesheet (cache busting param) -->
-  <link rel="stylesheet" href="/assets/site.css?v=about1">
-
-  <!-- Brand assets -->
-  <link rel="icon" type="image/svg+xml" href="/assets/logo-badge.svg">
-  <link rel="alternate icon" type="image/png" href="/assets/og-512.png" sizes="512x512">
+  <!-- CSS -->
+  <link rel="stylesheet" href="/assets/site.css?v=2025-08-18f">
 </head>
-<body>
-<header class="header">
-  <div class="container nav">
-	<div class="brand">
-  		<img class="logo" src="/assets/logo-badge.svg" alt="Offband logo" width="18" height="18">
-  		Offband
-	</div>
-    <nav>
-      <a href="/">Home</a>
-      <a href="/about.html">About</a>
-      <a href="/blog/">Blog</a>
-    </nav>
-  </div>
-</header>
+<body class="section-connect">
+  <!-- Top bar -->
+  <header class="topbar">
+    <div class="wrap nav">
+      <a href="/" class="brand">
+        <img src="/assets/logo-badge.svg?v=2025-08-18f" alt="Offband logo" class="logo" width="18" height="18">
+        <span class="brand-name">Offband</span>
+      </a>
+    </div>
+  </header>
 
-<main class="main">
-  <div class="container layout">
-    <!-- sidebar -->
-    <aside class="sidebar" id="sb"></aside>
+  <!-- Centered app layout -->
+  <main class="wrap layout">
+    <!-- Sidebar -->
+    <aside class="sidebar-shell">
+      <div data-include="/components/sidebar.html?v=2025-08-18f"></div>
+    </aside>
 
-    <!-- content -->
-    <section>
-      <h1>About Offband</h1>
-      <p>Offband is a personal project documenting security, homelab, and OSINT experiments. It’s designed to grow into a knowledge base, toolkit, and community.</p>
+    <!-- Content -->
+    <section class="content container">
+      <header>
+        <h1>About & Contact</h1>
+        <p class="muted">Offband is a security‑first, community lab. We publish homelab notes, OSINT experiments, and small operator tools — built in public.</p>
+      </header>
 
-      <h2>Contact</h2>
-      <!--EMAIL_START-->
-      <p>Email: <span id="e"><!-- filled at runtime --></span></p>
-      <script>(function(){
-        const parts = ["Y29udGFjdA==","b2ZmYmFuZA==","ZGV2"]; // contact, offband, dev
-        const addr = atob(parts[0])+"@"+atob(parts[1])+"."+atob(parts[2]);
-        const el = document.getElementById("e");
-        el.innerHTML = '<a href="mailto:'+addr+'">'+addr+'</a>';
-      })();</script>
-      <!--EMAIL_END-->
+      <section class="cards" aria-label="Contact & keys">
+        <article class="card">
+          <h2>Contact</h2>
+          <dl class="kv">
+            <dt>Email</dt>
+            <dd><span id="email"><!-- filled at runtime --></span></dd>
 
-      <div class="hr"></div>
-      <footer>© <span id="y"></span> Offband</footer>
+            <dt>security.txt</dt>
+            <dd><a href="/.well-known/security.txt">/.well-known/security.txt</a></dd>
+
+            <dt>Status</dt>
+            <dd><a href="/security/">Security dashboard</a></dd>
+          </dl>
+          <p class="small muted" style="margin-top:.75rem">We obfuscate the address on page load to reduce scraping.</p>
+        </article>
+
+        <article class="card">
+          <h2>Keys (optional)</h2>
+          <p class="muted">If you prefer encrypted mail, publish a PGP public key and link it here.</p>
+          <dl class="kv">
+            <dt>PGP</dt>
+            <dd><a href="/keys/offband.asc">/keys/offband.asc</a> <span class="muted">(placeholder)</span></dd>
+            <dt>Fingerprint</dt>
+            <dd><code>0000 0000 0000 0000 0000&nbsp;&nbsp;0000 0000 0000 0000 0000</code></dd>
+          </dl>
+        </article>
+
+        <article class="card">
+          <h2>Presence</h2>
+          <p class="muted">Links are placeholders until accounts are public.</p>
+          <ul>
+            <li><a rel="me" href="https://github.com/offband">GitHub</a></li>
+            <li><a rel="me" href="https://infosec.exchange/@offband">Mastodon</a></li>
+          </ul>
+        </article>
+      </section>
+
+      <section class="mt-2">
+        <h2>What we’re building</h2>
+        <p>Low‑cost, high‑efficiency, purpose‑built security. Notes and tooling you can clone, adapt, and ship. Start in <a href="/writeups/">Writeups</a>, then explore the live <a href="/security/">Security</a> dashboard.</p>
+      </section>
+
+      <div data-include="/components/footer.html?v=2025-08-18f"></div>
     </section>
-  </div>
-  <div data-include="/components/footer.html?v=2025-08-17f"></div>
-</main>
+  </main>
 
-<script src="/assets/sidebar.js" defer></script>
-<script src="/assets/sidebar-init.js" defer></script>
-<script src="/assets/year.js" defer></script>
+  <!-- Email obfuscation + JSON-LD injection -->
+  <script>
+  (function(){
+    // contact@offband.dev -> base64 parts
+    const parts = ["Y29udGFjdA==","b2ZmYmFuZA==","ZGV2"]; // contact, offband, dev
+    const addr  = atob(parts[0])+"@"+atob(parts[1])+"."+atob(parts[2]);
+
+    // Render obfuscated email
+    const el = document.getElementById("email");
+    if (el) el.innerHTML = '<a href="mailto:'+addr+'">'+addr+'</a>';
+
+    // JSON-LD Organization (email injected at runtime)
+    const ld = {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Offband",
+      "url": "https://offband.dev",
+      "logo": "https://offband.dev/assets/og-512.png",
+      "sameAs": [
+        "https://github.com/offband",
+        "https://infosec.exchange/@offband"
+      ],
+      "email": addr
+    };
+    const tag = document.createElement('script');
+    tag.type = "application/ld+json";
+    tag.text = JSON.stringify(ld);
+    document.head.appendChild(tag);
+  })();
+  </script>
+
+  <!-- Includes & sidebar init -->
+  <script src="/assets/include.js" defer></script>
+  <script src="/assets/sidebar-init.js" defer></script>
 </body>
 </html>

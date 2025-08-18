@@ -4,52 +4,132 @@
   <meta charset="utf-8">
   <title>Security · Offband</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta name="description" content="Live posture snapshot, recent events, and links to logs and writeups.">
   <link rel="canonical" href="https://offband.dev/security/">
-  <link rel="icon" type="image/svg+xml" href="/assets/logo-favicon.svg">
-  <link rel="alternate icon" type="image/png" href="/assets/og-512.png" sizes="512x512">
   <meta name="theme-color" content="#39FF14">
-  <link rel="stylesheet" href="/assets/site.css">
+
+  <link rel="icon" type="image/svg+xml" href="/assets/logo-badge.svg?v=2025-08-18f">
+  <link rel="alternate icon" type="image/png" href="/assets/og-512.png" sizes="512x512">
+
+  <link rel="stylesheet" href="/assets/site.css?v=2025-08-18f">
 </head>
-<body>
+<body class="section-security">
   <!-- Top bar -->
   <header class="topbar">
-    <a href="/" class="brand">
-      <img src="/assets/logo-badge.svg" alt="Offband logo" class="logo">
-      <span class="brand-name">Offband</span>
-    </a>
+    <div class="wrap nav">
+      <a href="/" class="brand">
+        <img src="/assets/logo-badge.svg?v=2025-08-18f" alt="Offband logo" class="logo" width="18" height="18">
+        <span class="brand-name">Offband</span>
+      </a>
+    </div>
   </header>
 
-  <div class="layout">
+  <!-- Centered app layout -->
+  <main class="wrap layout">
     <!-- Sidebar -->
     <aside class="sidebar-shell">
-      <div data-include="/components/sidebar.html?v=2025-08-17e"></div>
+      <div data-include="/components/sidebar.html?v=2025-08-18f"></div>
     </aside>
 
     <!-- Main -->
-    <main class="content container">
-      <h1>Security</h1>
+    <section class="content container">
+      <header>
+        <h1>Security</h1>
+        <nav class="subnav" aria-label="Security sections">
+          <a href="/security/" class="active">Overview</a>
+          <a href="/security/logs/">Logs</a>
+        </nav>
+        <p class="muted">Frontend-first dashboard; backend signals slot into these tiles as they come online.</p>
+      </header>
 
-      <nav class="subnav" aria-label="Security sections">
-        <a href="/security/" class="active">Overview</a>
-        <a href="/security/logs/">Logs</a>
-      </nav>
-
-      <section>
-        <p class="muted">Snapshot of defenses and recent activity.</p>
-        <ul id="pulse">
-          <li>Active defenses: ON</li>
-          <li>Last probe blocked: today 14:32</li>
-          <li>Honeypot: idle</li>
-        </ul>
-        <p class="muted">Detailed notes live in <a href="/security/logs/">Logs</a>.</p>
+      <!-- Dashboard tiles -->
+      <section class="hero-sec" aria-label="Live posture">
+        <div class="tile">
+          <h3>Active defenses</h3>
+          <div class="kpi"><span class="ok" id="kpi-def">ON</span></div>
+          <div class="meta">firewall, TLS, SSH hardening</div>
+        </div>
+        <div class="tile">
+          <h3>Last probe blocked</h3>
+          <div class="kpi" id="kpi-probe">—</div>
+          <div class="meta">source redacted • ufw/fail2ban</div>
+        </div>
+        <div class="tile">
+          <h3>Incidents (24h)</h3>
+          <div class="kpi" id="kpi-incidents">0</div>
+          <div class="meta"><a href="/security/logs/">see logs</a></div>
+        </div>
+        <div class="tile">
+          <h3>Honeypot</h3>
+          <div class="kpi" id="kpi-honey">idle</div>
+          <div class="meta">coming soon</div>
+        </div>
       </section>
 
-      <div data-include="/components/footer.html?v=2025-08-17f"></div>
-      
-    </main>
-  </div>
+      <!-- Overview blurbs -->
+      <section class="section" aria-labelledby="sec-overview">
+        <h2 id="sec-overview">Overview</h2>
+        <div class="cards">
+          <article class="card">
+            <h3>Baseline</h3>
+            <ul class="list">
+              <li>Public surface: 80/443 via Nginx behind Cloudflare.</li>
+              <li>SSH locked to keys; root login disabled; UFW default deny.</li>
+              <li>TLS: Let’s Encrypt; Cloudflare Full (strict).</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>Mesh &amp; admin</h3>
+            <ul class="list">
+              <li>Admin over private mesh (Tailscale) planned; 22 not exposed publicly.</li>
+              <li>Deploys pull from GitHub → Nginx reload.</li>
+              <li>Backups &amp; snapshots scheduled.</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>Next signals</h3>
+            <ul class="list">
+              <li>Fail2ban metrics → “Incidents (24h)”.</li>
+              <li>Nginx rate-limit counters → “Last probe blocked”.</li>
+              <li>Honeypot hit counts → “Honeypot”.</li>
+            </ul>
+          </article>
+        </div>
+      </section>
 
-  <script src="/assets/include.js"></script>
-  <script src="/assets/sidebar-init.js"></script>
+      <!-- Recent events preview -->
+      <section class="section" aria-labelledby="sec-events">
+        <h2 id="sec-events">Recent events</h2>
+        <div class="card">
+          <p class="muted" id="events-empty">No notable events yet. This feed will populate automatically once logging is enabled.</p>
+          <ul id="events-list" class="post-list" style="display:none;"></ul>
+          <p class="small muted">Full details live in <a href="/security/logs/">Security → Logs</a> (coming online within the week).</p>
+        </div>
+      </section>
+
+      <!-- Links out -->
+      <section class="section" aria-labelledby="sec-links">
+        <h2 id="sec-links">Deep dive</h2>
+        <div class="cards">
+          <article class="card">
+            <h3><a href="/security/logs/">Security log</a></h3>
+            <p class="muted">Raw entries with timestamps, sources, actions taken, and links to fix notes.</p>
+          </article>
+          <article class="card">
+            <h3><a href="/writeups/">Writeups</a></h3>
+            <p class="muted">Hardening guides, playbooks, and post‑mortems you can clone.</p>
+          </article>
+        </div>
+      </section>
+
+      <div data-include="/components/footer.html?v=2025-08-18f"></div>
+    </section>
+  </main>
+
+  <!-- Includes & init -->
+  <script src="/assets/include.js" defer></script>
+  <script src="/assets/sidebar-init.js" defer></script>
+  <script src="/assets/security.js" defer></script>
 </body>
 </html>

@@ -1,16 +1,90 @@
-<!doctype html><html><head><meta charset="utf-8"><title>Logs · Offband</title>
-<link rel="stylesheet" href="/assets/site.css"></head><body>
-<div data-include="/components/sidebar.html"></div>
-<main class="container">
-  <h1>Logs</h1>
-  <nav class="subnav">
-    <a href="/security/">Overview</a>
-    <a href="/security/logs/" class="active">Logs</a>
-  </nav>
-  <section>
-    <ul class="post-list">
-      <li><a href="/security/logs/2025-08-17-hardening-web-server.html">2025-08-17 — Hardening web server for deployment</a></li>
-    </ul>
-  </section>
-</main>
-<script src="/assets/sidebar-init.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Logs · Offband</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta name="description" content="Raw security entries with timestamps, sources, actions, and related writeups.">
+  <link rel="canonical" href="https://offband.dev/security/logs/">
+  <meta name="theme-color" content="#39FF14">
+
+  <link rel="icon" type="image/svg+xml" href="/assets/logo-badge.svg?v=2025-08-18f">
+  <link rel="alternate icon" type="image/png" href="/assets/og-512.png" sizes="512x512">
+
+  <link rel="stylesheet" href="/assets/site.css?v=2025-08-18f">
+</head>
+<body class="section-security">
+  <!-- Top bar -->
+  <header class="topbar">
+    <div class="wrap nav">
+      <a href="/" class="brand">
+        <img src="/assets/logo-badge.svg?v=2025-08-18f" alt="Offband logo" class="logo" width="18" height="18">
+        <span class="brand-name">Offband</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- Centered app layout -->
+  <main class="wrap layout">
+    <!-- Sidebar -->
+    <aside class="sidebar-shell">
+      <div data-include="/components/sidebar.html?v=2025-08-18f"></div>
+    </aside>
+
+    <!-- Content -->
+    <section class="content container">
+      <header>
+        <h1>Logs</h1>
+        <nav class="subnav" aria-label="Security sections">
+          <a href="/security/">Overview</a>
+          <a href="/security/logs/" class="active">Logs</a>
+        </nav>
+        <p class="muted">Raw entries with timestamps, sources, actions taken, and links to related writeups.</p>
+      </header>
+
+      <!-- Quick filter (static UI for now) -->
+      <div class="searchbar" style="margin:.75rem 0 1rem;">
+        <input type="search" placeholder="Filter by source, action, URL…" aria-label="Filter logs">
+        <a class="btn ghost" href="/security/">Back to overview</a>
+      </div>
+
+      <!-- Log list (placeholder until pipeline is live) -->
+      <section aria-labelledby="log-list">
+        <h2 id="log-list" class="visually-hidden">Entries</h2>
+        <ul class="post-list">
+          <li>
+            <strong>2025‑08‑17 14:32</strong> —
+            <span class="muted">ufw</span> —
+            Blocked HTTP probe <code>198.51.100.24</code>
+            · <a href="/writeups/2025-08-17-hardening-web-server.html">related note</a>
+          </li>
+          <li>
+            <strong>2025‑08‑16 22:10</strong> —
+            <span class="muted">nginx</span> —
+            Rate‑limited <code>/wp-login.php</code> bursts from <code>203.0.113.88</code>
+          </li>
+          <li>
+            <strong>2025‑08‑16 09:05</strong> —
+            <span class="muted">certbot</span> —
+            Renewed TLS successfully
+          </li>
+        </ul>
+        <p class="small muted">Pipeline not live yet — these are placeholders. When logging is enabled, entries will populate automatically.</p>
+      </section>
+
+      <div class="hr"></div>
+      <p class="small muted">
+        See also: <a href="/writeups/">Writeups</a> ·
+        <a href="/.well-known/security.txt">security.txt</a>
+      </p>
+
+      <div data-include="/components/footer.html?v=2025-08-18f"></div>
+    </section>
+  </main>
+
+  <!-- Includes & sidebar init -->
+  <script src="/assets/include.js" defer></script>
+  <script src="/assets/sidebar-init.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>{{TITLE}}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="{{DESCRIPTION}}">
+  <link rel="canonical" href="{{CANONICAL}}">
+
+  <!-- Brand / theme -->
+  <meta name="theme-color" content="#39FF14">
+  <link rel="icon" type="image/svg+xml" href="/assets/logo-badge.svg?v={{VER}}">
+  <link rel="alternate icon" type="image/png" href="/assets/og-512.png" sizes="512x512">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/assets/site.css?v={{VER}}">
+</head>
+<body class="section-{{SECTION}}">
+  <!-- Top bar -->
+  <header class="topbar">
+    <div class="wrap nav">
+      <a href="/" class="brand">
+        <img src="/assets/logo-badge.svg?v={{VER}}" alt="Offband logo" class="logo" width="18" height="18">
+        <span class="brand-name">Offband</span>
+      </a>
+      <!-- (optional) account/login chips go here -->
+    </div>
+  </header>
+
+  <!-- Centered app layout -->
+  <main class="wrap layout">
+    <!-- Sidebar -->
+    <aside class="sidebar-shell">
+      <div data-include="/components/sidebar.html?v={{VER}}"></div>
+    </aside>
+
+    <!-- Page content -->
+    <section class="content container">
+      {{CONTENT}}
+
+      <div data-include="/components/footer.html?v={{VER}}"></div>
+    </section>
+  </main>
+
+  <!-- Includes & sidebar init -->
+  <script src="/assets/include.js" defer></script>
+  <script src="/assets/sidebar-init.js" defer></script>
+  {{EXTRA_SCRIPTS}}
+</body>
+</html>
