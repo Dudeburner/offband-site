@@ -1,0 +1,9 @@
+# macOS Finder
+.DS_Store
+
+# Editor/OS temp
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
