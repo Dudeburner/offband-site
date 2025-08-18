@@ -401,3 +401,33 @@ footer{ margin-top:1.5rem; color:var(--muted); }
 
 .list-tight { margin: .25rem 0; padding-left: 1.1rem; }
 .list-tight li { margin: .15rem 0; }
+
+/* === Offband quick fixes (center + header icon + no duplicate brand) === */
+
+/* Ensure the main two‑column frame always centers */
+.layout {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1.25rem;
+}
+
+/* Keep the header badge small */
+.topbar .logo-badge {
+  width: 18px;
+  height: 18px;
+  border-radius: .35rem;
+  padding: 0;               /* no extra padding in the header */
+}
+
+/* Hero/brand badge stays larger (only inside hero/brand-badge) */
+.hero .logo-badge,
+.brand-badge .badge-img {
+  width: 28px;
+  height: 28px;
+}
+
+/* If a page has a hero, hide the tiny header brand to avoid duplication.
+   Add class="has-hero" on <body> for pages that use the hero block. */
+body.has-hero .topbar .brand {
+  display: none;
+}
