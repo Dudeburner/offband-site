@@ -1,124 +1,69 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Writeups · Offband</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <meta name="description" content="Operator-grade tutorials, homelab notes, and security experiments — built in public.">
-  <link rel="canonical" href="https://offband.dev/writeups/">
-  <meta name="theme-color" content="#39FF14">
-
-  <link rel="icon" type="image/svg+xml" href="/assets/logo-badge.svg?v=2025-08-18f">
-  <link rel="alternate icon" type="image/png" href="/assets/og-512.png" sizes="512x512">
-
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="Offband">
-  <meta property="og:title" content="Offband — Operator writeups & notes">
-  <meta property="og:description" content="Operator-grade tutorials, homelab notes, and security experiments — built in public.">
-  <meta property="og:url" content="https://offband.dev/writeups/">
-  <meta property="og:image" content="https://offband.dev/assets/og-512.png">
-  <meta name="twitter:card" content="summary_large_image">
-
-  <link rel="stylesheet" href="/assets/site.css?v=2025-08-18f">
+  <meta name="description" content="Operator‑grade tutorials, homelab notes, and security experiments — built in public." />
+  <link rel="stylesheet" href="/assets/site.css" />
+  <script defer src="/assets/include.js"></script>
+  <script defer src="/assets/sidebar.js"></script>
 </head>
-<body class="section-writeups">
-  <!-- Top bar -->
+<body class="layout-shell">
+
   <header class="topbar">
-    <div class="wrap nav">
-      <a href="/" class="brand">
-        <img src="/assets/logo-badge.svg?v=2025-08-18f" alt="Offband logo" class="logo" width="18" height="18">
-        <span class="brand-name">Offband</span>
-      </a>
-    </div>
+    <a class="topbar__brand" href="/">
+      <img class="logo-badge" src="/assets/logo-badge.svg" alt="" aria-hidden="true" />
+      <span class="brand-name">Offband</span>
+    </a>
+    <nav class="topbar__actions">
+      <a class="link" href="/connect/">Login</a>
+      <span id="account-badge" class="badge" hidden>acct</span>
+    </nav>
   </header>
 
-  <!-- Centered app layout -->
-  <main class="wrap layout">
-    <!-- Sidebar -->
-    <aside class="sidebar-shell">
-      <div data-include="/components/sidebar.html?v=2025-08-18f"></div>
-    </aside>
+  <div class="layout">
+    <aside id="sidebar" data-include="/components/sidebar.html"></aside>
 
-    <!-- Content -->
-    <section class="content container">
-      <header>
-        <h1>Writeups</h1>
-        <p class="muted">Tutorials, case studies, and notes. Search, filter, and get all the context you need to replicate the work.</p>
-      </header>
-
-      <!-- Researcher toolbelt -->
-      <section class="toolbelt" aria-label="Research tools" style="margin:.5rem 0 1.25rem;">
-        <div class="searchbar">
-          <input id="wu-q" type="search" placeholder="Search titles, tags, and summaries…" autocomplete="off" spellcheck="false" />
-        </div>
-        <div class="filters" id="wu-filters" role="group" aria-label="Filter by tag" style="margin-top:.5rem;">
-          <button class="pill" data-tag="homelab" aria-pressed="false">homelab</button>
-          <button class="pill" data-tag="nginx" aria-pressed="false">nginx</button>
-          <button class="pill" data-tag="cloudflare" aria-pressed="false">cloudflare</button>
-          <button class="pill" data-tag="git-deploy" aria-pressed="false">git-deploy</button>
-          <button class="pill" data-tag="server-hardening" aria-pressed="false">server-hardening</button>
-          <button class="pill" data-tag="ops" aria-pressed="false">ops</button>
-        </div>
-        <div class="results-meta" id="wu-meta" aria-live="polite" class="small muted"></div>
+    <main id="content" class="content">
+      <section class="card hero">
+        <h1 class="brandmark">
+          <img class="logo-badge" src="/assets/logo-badge.svg" alt="" aria-hidden="true" />
+          Writeups
+        </h1>
+        <p class="lede">Operator‑grade tutorials, case studies, and notes. No fluff.</p>
+        <p class="subtle">Expect runnable steps, tight scope, and “issues &amp; fixes.”</p>
       </section>
 
-      <!-- Featured -->
-      <section class="mt-2" aria-labelledby="featured-title">
-        <h2 id="featured-title">Featured</h2>
-        <div class="cards">
-          <article class="card">
-            <h3><a href="/writeups/posts/primer-structure-style.html">Primer — structure &amp; style</a></h3>
-            <p class="muted">Standards for future writeups: layout, headings, code blocks, and “issues &amp; fixes”.</p>
-          </article>
-          <article class="card">
-            <h3><a href="/security/logs/2025-08-17-hardening-web-server.html">Hardening web server for deployment</a></h3>
-            <p class="muted">Ubuntu → Nginx → firewall → monitoring. End to end.</p>
-          </article>
-        </div>
+      <section class="feature-grid grid-2">
+        <article class="card feature">
+          <h3>Featured</h3>
+          <a class="block-link" href="/security/logs/2025-08-17-hardening-web-server.html">
+            Hardening web server for deployment
+          </a>
+          <p class="muted">Ubuntu → Nginx → firewall → monitoring. End to end.</p>
+        </article>
+
+        <article class="card feature">
+          <h3>Primer</h3>
+          <a class="block-link" href="/writeups/posts/coming-soon.html">
+            Primer — structure &amp; style
+          </a>
+          <p class="muted">Layout, headings, code blocks, and “issues &amp; fixes”.</p>
+        </article>
       </section>
 
-      <!-- All writeups (JS filters/search operate on this list) -->
-      <section class="mt-2" aria-labelledby="all-title">
-        <h2 id="all-title">All writeups</h2>
-        <ul id="wu-list" class="post-list">
-          <!-- EXAMPLES — duplicate/modify as you add content -->
-          <li class="post-item" data-tags="homelab nginx server-hardening ops">
-            <a class="title" href="/security/logs/2025-08-17-hardening-web-server.html">Hardening web server for deployment</a>
-            <div class="meta">
-              <span>2025‑08‑17</span>
-              <span class="tag">homelab</span><span class="tag">nginx</span><span class="tag">server-hardening</span><span class="tag">ops</span>
-            </div>
-            <p class="muted">Baseline Ubuntu, UFW, Nginx, TLS, monitoring. Includes pitfalls and fixes.</p>
-          </li>
-
-          <li class="post-item" data-tags="ops git-deploy">
-            <a class="title" href="/writeups/posts/static-deploy-rsync-nginx.html">Static deploy: rsync → Nginx (v0.1)</a>
-            <div class="meta">
-              <span>2025‑08‑16</span>
-              <span class="tag">ops</span><span class="tag">git-deploy</span>
-            </div>
-            <p class="muted">Minimal, repeatable shipping without a CI behemoth. Makefile + server reset.</p>
-          </li>
-
-          <li class="post-item" data-tags="ops homelab">
-            <a class="title" href="/writeups/posts/primer-structure-style.html">Primer — structure &amp; style</a>
-            <div class="meta">
-              <span>2025‑08‑15</span>
-              <span class="tag">ops</span><span class="tag">homelab</span>
-            </div>
-            <p class="muted">Standards for consistent technical notes and publishable writeups.</p>
-          </li>
+      <section class="card">
+        <h2>All writeups</h2>
+        <ul class="list-tight">
+          <li><a href="/security/logs/2025-08-17-hardening-web-server.html">Hardening web server for deployment</a></li>
+          <li><a href="/writeups/posts/coming-soon.html">Primer — structure &amp; style</a></li>
+          <!-- add more as they land -->
         </ul>
       </section>
 
-      <div data-include="/components/footer.html?v=2025-08-18f"></div>
-    </section>
-  </main>
-
-  <!-- Includes & behavior -->
-  <script src="/assets/include.js" defer></script>
-  <script src="/assets/sidebar-init.js" defer></script>
-  <script src="/assets/writeups.js" defer></script>
+      <footer data-include="/components/footer.html"></footer>
+    </main>
+  </div>
 </body>
 </html>
