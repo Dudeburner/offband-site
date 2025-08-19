@@ -102,4 +102,4 @@
 
     window.location.href = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodedBody}`;
   });
-
+})();

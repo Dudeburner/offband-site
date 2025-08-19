@@ -123,3 +123,7 @@ help:
 	@echo "  make serve        - optional local preview (if tools/offband.sh exists)"
 
 .PHONY: push deploy push-deploy doctor preflight help serve
+
+.PHONY: audit
+audit: ## run local project checks (lint, links, security.txt, pgp wiring)
+	@tools/audit.sh
