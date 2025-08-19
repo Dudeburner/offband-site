@@ -1,6 +1,6 @@
 Contact: mailto:security@offband.dev
 Contact: mailto:connect@offband.dev
-Encryption: https://offband.dev/keys/offband.asc
+Encryption: https://offband.dev/assets/pgp/offband.asc
 Acknowledgments: https://offband.dev/security/acknowledgments.html
 Preferred-Languages: en
 Canonical: https://offband.dev/.well-known/security.txt
