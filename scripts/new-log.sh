@@ -2,13 +2,13 @@
 set -euo pipefail
 
 # Usage:
-#   tools/new-log.sh "Short title" --date YYYY-MM-DD --time HH:MM --body "One-line plain update"
+#   scripts/new-log.sh "Short title" --date YYYY-MM-DD --time HH:MM --body "One-line plain update"
 # Defaults: --date = today (local), --time = current, --body = "Updated"
 
 TITLE="${1:-}"
 if [[ -z "$TITLE" ]]; then
   echo "Error: title is required" >&2
-  echo "Usage: tools/new-log.sh \"Short title\" [--date YYYY-MM-DD] [--time HH:MM] [--body \"message\"]" >&2
+  echo "Usage: scripts/new-log.sh \"Short title\" [--date YYYY-MM-DD] [--time HH:MM] [--body \"message\"]" >&2
   exit 1
 fi
 shift || true
