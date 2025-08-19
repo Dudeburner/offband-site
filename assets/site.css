@@ -76,7 +76,9 @@ h3{ font-size:1.1rem; }
   color:var(--fg); text-decoration:none; font-weight:700; letter-spacing:.2px;
 }
 .topbar .brand:hover{ text-decoration:none; }
-.topbar .logo-badge{ width:20px; height:20px; border-radius:.35rem; display:block; }
+.topbar .logo-badge{ width:20px; height:20px; border-radius:.35rem; }
+/* Standardize tiny brand mark inside sidebar headers too */
+.sidebar .logo-badge{ width:18px; height:18px; border-radius:.35rem; }
 .topbar .login{
   position:absolute; right:16px; top:50%; transform:translateY(-50%);
   font-weight:500;
@@ -181,6 +183,14 @@ body.has-hero .topbar .brand{ display:none; }
 .lede{ font-size:1.05rem; margin:.25rem 0; }
 .subtle{ color:var(--muted); margin:.1rem 0 .75rem; }
 .hero__actions{ display:inline-flex; gap:.75rem; flex-wrap:wrap; }
+
+/* Home (lobby) layout: open, centered, no sidebar */
+body.home .layout{ grid-template-columns: 1fr; max-width: 880px; }
+body.home #sidebar{ display:none; }
+body.home .hero{ text-align:center; margin-top: 1.25rem; }
+body.home .hero .brandmark{ justify-content:center; font-size:2.2rem; }
+body.home .hero .logo-badge{ width:64px; height:64px; border-radius:.75rem; }
+body.home .hero__actions{ justify-content:center; }
 
 /* Brand “chip” (optional) */
 .brand-badge{
