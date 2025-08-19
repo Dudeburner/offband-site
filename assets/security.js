@@ -103,10 +103,3 @@
     window.location.href = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodedBody}`;
   });
 
-  // Optional: bind encrypt button if your existing code expects a different id
-  document.getElementById('pgp-encrypt')?.addEventListener('click', () => {
-    // If your encrypt function is already wired elsewhere, you can remove this.
-    // Otherwise, call your existing encrypt routine here.
-    // e.g. window.offbandEncrypt && window.offbandEncrypt();
-  });
-})();
