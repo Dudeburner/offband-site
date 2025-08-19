@@ -10,17 +10,13 @@
   <script defer src="/assets/sidebar.js"></script>
 </head>
 <body class="has-hero">
-  <!-- Top bar: small brand left, auth slot right -->
-  <header class="topbar">
-    <a class="topbar__brand" href="/">
+  <div class="topbar">
+    <a class="brand" href="/">
       <img class="logo-badge" src="/assets/logo-badge.svg" alt="" aria-hidden="true" />
-      <span class="brand-name">Offband</span>
+      <span>Offband</span>
     </a>
-    <nav class="topbar__actions">
-      <!-- placeholder; wire later -->
-      <a class="link" href="/connect/">Login</a>
-      <span id="account-badge" class="badge" hidden>acct</span>
-    </nav>
+    <a class="login" href="/login">Login</a>
+  </div>
   </header>
 
   <div class="layout">
