@@ -17,7 +17,6 @@
     </a>
     <a class="login" href="/login">Login</a>
   </div>
-  </header>
 
   <div class="layout">
     <aside id="sidebar" data-include="/components/sidebar.html"></aside>
@@ -59,18 +58,18 @@
 	    </label>
 
 	    <label>Message
-	      <textarea id="pgp-plain" rows="6" placeholder="Write your message…"></textarea>
+	      <textarea id="pgp-plain" rows="12" style="width:100%;box-sizing:border-box;" placeholder="Write your message…"></textarea>
 	    </label>
 
 	    <div class="actions" style="margin: 8px 0;">
-	      <button class="btn btn--primary" id="pgp-encrypt">Encrypt</button>
-	      <button class="btn" id="pgp-copy">Copy</button>
-	      <button class="btn" id="pgp-download">Download</button>
+	      <button class="btn btn--primary" id="pgp-encrypt" type="button">Encrypt</button>
+	      <button class="btn" id="pgp-copy" type="button">Copy</button>
+	      <button class="btn" id="pgp-download" type="button">Download</button>
 	      <a class="btn" id="pgp-email" href="#">Open in email</a>
 	    </div>
 
 	    <label>Encrypted (ASCII‑armored)
-	      <textarea id="pgp-armored" rows="8" readonly placeholder="-----BEGIN PGP MESSAGE-----"></textarea>
+	      <textarea id="pgp-armored" rows="16" style="width:100%;box-sizing:border-box;font-family:monospace;" readonly placeholder="-----BEGIN PGP MESSAGE-----"></textarea>
 	    </label>
 	  </section>
 
@@ -79,40 +78,9 @@
   </div>
 <!-- OpenPGP (CDN). You can swap to a local copy later if you prefer. -->
 <script defer src="https://unpkg.com/openpgp@5.11.1/dist/openpgp.min.js"></script>
-
-<script>
-(async function () {
-  const KEY_URL = '/assets/pgp/offband.asc';  // you already have this file
-
-  const $ = (sel) => document.querySelector(sel);
-  const btn     = $('#pgp-encrypt');
-  const plain   = $('#pgp-plain');
-  const out     = $('#pgp-armored');
-  const rcptSel = $('#pgp-recipient');
-
-  async function loadKey() {
-    const res = await fetch(KEY_URL, { cache: 'reload' });
-    if (!res.ok) throw new Error('Key fetch failed: ' + res.status);
-    const armored = await res.text();
-    return await openpgp.readKey({ armoredKey: armored });
-  }
-
-  const pubKey = await loadKey(); // load once on page load
-
-  btn?.addEventListener('click', async () => {
-    try {
-      const message = await openpgp.createMessage({ text: plain.value });
-      const encrypted = await openpgp.encrypt({
-        message,
-        encryptionKeys: pubKey
-      });
-      out.value = encrypted; // ASCII-armored block
-    } catch (e) {
-      console.error(e);
-      alert('Encryption failed (see console for details).');
-    }
-  });
-})();
-</script>
+<!-- Standardized widget that wires Encrypt/Copy/Download/Email -->
+<script defer src="/assets/pgp-widget.js"></script>
+<!-- Keep security.js for dashboard placeholder logic only -->
+<script defer src="/assets/security.js"></script>
 </body>
 </html>

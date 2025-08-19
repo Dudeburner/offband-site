@@ -1,121 +1,150 @@
-// /assets/pgp-widget.js
+// /assets/pgp-widget.js (standardized)
 (function () {
-  // IDs expected in the markup
+  // IDs expected in the markup (must match connect/index.html)
   const IDS = {
-    recipient: 'pgp-recipient',     // <select>
-    plain:     'pgp-plain',         // <textarea>
-    output:    'pgp-output',        // <textarea>
-    encBtn:    'pgp-encrypt',       // <button>
-    copyBtn:   'pgp-copy',          // <button>
-    dlBtn:     'pgp-download',      // <button>
-    mailBtn:   'pgp-email'          // <a>
+    recipient: 'pgp-recipient',   // <select>
+    plain:     'pgp-plain',       // <textarea>
+    output:    'pgp-armored',     // <textarea>
+    encBtn:    'pgp-encrypt',     // <button>
+    copyBtn:   'pgp-copy',        // <button>
+    dlBtn:     'pgp-download',    // <button>
+    mailBtn:   'pgp-email'        // <a>
   };
 
-  async function ensureKey() {
-    // Adjust the path to match where your key really lives.
-    // Your Network tab shows you fetching /offband.asc successfully.
-    const res = await fetch('/offband.asc', { cache: 'no-store' });
-    if (!res.ok) throw new Error('Failed to fetch public key');
-    const asc = await res.text();
-    return await openpgp.readKey({ armoredKey: asc });
-  }
+  // Conservative safe length for mailto bodies (encoded)
+  const MAILTO_SAFE_LIMIT = 1800;
 
-  async function encryptTo(key, text) {
-    const message = await openpgp.createMessage({ text });
-    return await openpgp.encrypt({ message, encryptionKeys: key });
-  }
-
+  // Helper shorthands
   function byId(id) { return document.getElementById(id); }
-  function text(el) { return (el?.value || '').trim(); }
+  function val(el)  { return (el?.value || '').trim(); }
 
-  function enableButtons(enabled) {
+  function enableActionButtons(enabled) {
     [IDS.copyBtn, IDS.dlBtn, IDS.mailBtn].forEach(id => {
       const el = byId(id);
       if (el) el.disabled = !enabled;
     });
   }
 
+  // Load key once (from the path used on the connect page)
+  let cachedKey = null;
+  async function getKey() {
+    if (cachedKey) return cachedKey;
+    const res = await fetch('/assets/pgp/offband.asc', { cache: 'no-store' });
+    if (!res.ok) throw new Error('Failed to fetch public key');
+    const asc = await res.text();
+    cachedKey = await openpgp.readKey({ armoredKey: asc });
+    return cachedKey;
+  }
+
+  async function encryptMessage(text) {
+    const message = await openpgp.createMessage({ text });
+    return await openpgp.encrypt({ message, encryptionKeys: await getKey() });
+  }
+
   function bind() {
-    const sel     = byId(IDS.recipient);
-    const plainEl = byId(IDS.plain);
-    const outEl   = byId(IDS.output);
-    const encBtn  = byId(IDS.encBtn);
-    const copyBtn = byId(IDS.copyBtn);
-    const dlBtn   = byId(IDS.dlBtn);
-    const mailBtn = byId(IDS.mailBtn);
+    const rcpt   = byId(IDS.recipient);
+    const plain  = byId(IDS.plain);
+    const output = byId(IDS.output);
+    const encBtn = byId(IDS.encBtn);
+    const copyBtn= byId(IDS.copyBtn);
+    const dlBtn  = byId(IDS.dlBtn);
+    const mailBtn= byId(IDS.mailBtn);
 
-    if (!encBtn || !plainEl || !outEl) {
-      // Not on this page
-      return;
-    }
+    if (!plain || !output || !encBtn) return; // not on this page
 
-    // Prevent buttons inside a form from submitting
+    // Prevent accidental form submits
     [encBtn, copyBtn, dlBtn].forEach(b => { if (b) b.type = 'button'; });
-    enableButtons(false);
 
-    let pubKey = null; // cache after first fetch
+    // Disabled until first successful encrypt
+    enableActionButtons(false);
 
+    // Encrypt
     encBtn.addEventListener('click', async () => {
       try {
-        if (typeof openpgp === 'undefined') {
-          throw new Error('OpenPGP not loaded');
-        }
-        const msg = text(plainEl);
-        if (!msg) {
+        if (typeof openpgp === 'undefined') throw new Error('OpenPGP not loaded');
+        const text = val(plain);
+        if (!text) {
           alert('Write a message to encrypt.');
           return;
         }
-        pubKey = pubKey || await ensureKey();
+        const armored = await encryptMessage(text);
+        output.value = armored;
 
-        const armored = await encryptTo(pubKey, msg);
-        outEl.value = armored;
-
-        // Copy/Download/Email become active now
-        enableButtons(true);
-
-        // Update mailto link to selected recipient with the armored text
-        const to = sel?.value || 'contact@offband.dev';
-        const mailHref = 'mailto:' + encodeURIComponent(to)
-          + '?subject=' + encodeURIComponent('Encrypted message')
-          + '&body=' + encodeURIComponent(armored);
-        if (mailBtn) mailBtn.href = mailHref;
+        // Enable Copy / Download / Email now that we have ciphertext
+        enableActionButtons(true);
       } catch (e) {
         console.error('[pgp-widget] encrypt failed:', e);
         alert('Encrypt failed: ' + e.message);
-        enableButtons(false);
+        enableActionButtons(false);
       }
     });
 
+    // Copy
     copyBtn?.addEventListener('click', async () => {
-      const val = text(outEl);
-      if (!val) return;
+      const armored = val(output);
+      if (!armored) { alert('Encrypt your message first.'); return; }
       try {
-        await navigator.clipboard.writeText(val);
-      } catch {
-        // Fallback
-        outEl.select();
-        document.execCommand('copy');
+        await navigator.clipboard.writeText(armored);
+        alert('Encrypted text copied to clipboard.');
+      } catch (e) {
+        try {
+          output.select();
+          document.execCommand('copy');
+          alert('Encrypted text copied to clipboard.');
+        } catch {
+          alert('Copy blocked. Select the text and copy manually.');
+        }
       }
     });
 
+    // Download
     dlBtn?.addEventListener('click', () => {
-      const val = text(outEl);
-      if (!val) return;
-      const blob = new Blob([val], { type: 'text/plain;charset=utf-8' });
+      const armored = val(output);
+      if (!armored) { alert('Encrypt your message first.'); return; }
+      const blob = new Blob([armored], { type: 'text/plain;charset=utf-8' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'offband-encrypted.asc.txt';
+      a.download = 'offband-message.asc';
       document.body.appendChild(a);
       a.click();
       URL.revokeObjectURL(url);
       a.remove();
     });
+
+    // Open in email (clipboard‑first with size guard)
+    mailBtn?.addEventListener('click', async (ev) => {
+      ev.preventDefault();
+      const armored = val(output);
+      if (!armored) { alert('Encrypt your message first.'); return; }
+
+      const to = rcpt?.value || 'connect@offband.dev';
+      const subject = 'Encrypted message for Offband';
+
+      // Try to copy full ciphertext to clipboard first
+      try { await navigator.clipboard.writeText(armored); } catch {}
+
+      // Encode body; if too big, send short instructions instead
+      const crlfBody = armored.replace(/\r\n/g, '\n').replace(/\n/g, '\r\n');
+      const encodedBody = encodeURIComponent(crlfBody);
+
+      let bodyParam;
+      if (encodedBody.length > MAILTO_SAFE_LIMIT) {
+        bodyParam = encodeURIComponent(
+          'PGP message copied to your clipboard.\r\n\r\n' +
+          'Paste it into the email body (or use the Download button to attach the .asc file).'
+        );
+      } else {
+        bodyParam = encodedBody;
+      }
+
+      const href = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${bodyParam}`;
+      window.location.href = href;
+    });
   }
 
-  // Wait for your HTML partials to finish loading (include.js fires this)
+  // Bind after includes and on DOM ready
   document.addEventListener('includes:loaded', bind);
-  // And also bind on DOM ready (in case the widget lives in the base page)
   if (document.readyState !== 'loading') bind();
   else document.addEventListener('DOMContentLoaded', bind);
 })();
