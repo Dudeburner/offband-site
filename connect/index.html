@@ -9,6 +9,8 @@
   <script defer src="/assets/include.js"></script>
   <script defer src="/assets/sidebar.js"></script>
 </head>
+
+
 <body class="has-hero">
   <header class="topbar">
     <a class="topbar__brand" href="/">
@@ -56,15 +58,69 @@
         </article>
       </section>
 
-      <!-- Optional: inline PGP widget anchor -->
-      <section id="encrypt" class="card">
-        <h2>Encrypt a message (client‑side)</h2>
-        <!-- Your existing PGP UI/logic lives here -->
-        <p class="muted">Use the widget to encrypt to <code>contact@offband.dev</code> or <code>security@offband.dev</code>.</p>
+	  <section class="card" id="pgp-widget">
+		<h3>Encrypt a message</h3>
+		<p>Browser‑side PGP. Nothing leaves your machine until you send it.</p>
+
+		<label>Recipient
+		  <select id="pgp-recipient">
+		    <option value="connect@offband.dev">connect@offband.dev</option>
+		    <option value="security@offband.dev">security@offband.dev</option>
+		  </select>
+		</label>
+
+		<label>Message
+		  <textarea id="pgp-plain" rows="6" placeholder="Write your message…"></textarea>
+		</label>
+
+		<div style="margin: 8px 0;">
+		  <button id="pgp-encrypt" class="btn btn--primary">Encrypt</button>
+		</div>
+
+		<label>Encrypted (ASCII‑armored)
+		  <textarea id="pgp-armored" rows="10" readonly placeholder="-----BEGIN PGP MESSAGE-----"></textarea>
+		</label>
       </section>
 
       <footer data-include="/components/footer.html"></footer>
     </main>
   </div>
+<!-- OpenPGP (CDN). You can swap to a local copy later if you prefer. -->
+<script defer src="https://unpkg.com/openpgp@5.11.1/dist/openpgp.min.js"></script>
+
+<script>
+(async function () {
+  const KEY_URL = '/assets/pgp/offband.asc';  // you already have this file
+
+  const $ = (sel) => document.querySelector(sel);
+  const btn     = $('#pgp-encrypt');
+  const plain   = $('#pgp-plain');
+  const out     = $('#pgp-armored');
+  const rcptSel = $('#pgp-recipient');
+
+  async function loadKey() {
+    const res = await fetch(KEY_URL, { cache: 'reload' });
+    if (!res.ok) throw new Error('Key fetch failed: ' + res.status);
+    const armored = await res.text();
+    return await openpgp.readKey({ armoredKey: armored });
+  }
+
+  const pubKey = await loadKey(); // load once on page load
+
+  btn?.addEventListener('click', async () => {
+    try {
+      const message = await openpgp.createMessage({ text: plain.value });
+      const encrypted = await openpgp.encrypt({
+        message,
+        encryptionKeys: pubKey
+      });
+      out.value = encrypted; // ASCII-armored block
+    } catch (e) {
+      console.error(e);
+      alert('Encryption failed (see console for details).');
+    }
+  });
+})();
+</script>
 </body>
 </html>
