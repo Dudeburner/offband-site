@@ -69,15 +69,38 @@
     a.remove();
   });
 
-  // Open default mail client with armored blob in body
-  document.getElementById('pgp-email')?.addEventListener('click', (ev) => {
+  document.getElementById('pgp-email')?.addEventListener('click', async (ev) => {
     ev.preventDefault();
-    const text = out();
-    if (!text) return;
+
+    // Pull the armored message safely
+    const a = document.getElementById('pgp-armored');
+    const armored = (a?.value || '').replace(/\r\n/g, '\n');
+    if (!armored.trim()) {
+      alert('Nothing to send yet. Click Encrypt first.');
+      return;
+    }
+
     const to = document.getElementById('pgp-recipient')?.value || 'connect@offband.dev';
-    const subject = encodeURIComponent('Encrypted message for Offband');
-    const body = encodeURIComponent(text);
-    window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
+    const subject = 'Encrypted message for Offband';
+
+    // Normalize newlines to CRLF per RFC, then encode
+    const crlf = armored.replace(/\n/g, '\r\n');
+    const encodedBody = encodeURIComponent(crlf);
+
+    // Some mail clients choke on large mailto bodies. Guard/fallback.
+    const MAILTO_SAFE_LIMIT = 1800; // conservative
+    if (encodedBody.length > MAILTO_SAFE_LIMIT) {
+      // Best‑effort: copy to clipboard and attach short instructions
+      try { await navigator.clipboard.writeText(armored); } catch {}
+      const shortBody = encodeURIComponent(
+        'PGP message copied to your clipboard.\r\n\r\n'
+        + 'Paste it into the email body, or attach the downloaded .asc file.'
+      );
+      window.location.href = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${shortBody}`;
+      return;
+    }
+
+    window.location.href = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodedBody}`;
   });
 
   // Optional: bind encrypt button if your existing code expects a different id
