@@ -1,6 +1,6 @@
 // include.js — robust HTML include with cache-bust + script execution + logging
 (function () {
-  const VERSION = '2025-08-17c'; // bump when you change any included partials
+  const VERSION = '2025-08-18a'; // bump when you change any included partials
 
   function ready(fn){
     if (document.readyState === 'loading') {

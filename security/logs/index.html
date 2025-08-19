@@ -10,13 +10,7 @@
   <script defer src="/assets/sidebar.js"></script>
 </head>
 <body class="has-hero">
-  <div class="topbar">
-    <a class="brand" href="/">
-      <img class="logo-badge" src="/assets/logo-badge.svg" alt="" aria-hidden="true" />
-      <span>Offband</span>
-    </a>
-    <a class="login" href="/login">Login</a>
-  </div>
+  <div data-include="/components/topbar.html"></div>
   </header>
 
   <div class="layout">
@@ -31,16 +25,18 @@
         <p class="lede">Short entries. What happened, what we changed, and links to fixes.</p>
       </section>
 
-      <section class="card">
-        <ul class="list-tight">
-          <li>
-            <a href="/security/logs/2025-08-17-hardening-web-server.html">
-              2025‑08‑17 — Hardening web server for deployment
-            </a>
-          </li>
-          <!-- more entries go here -->
+      <main class="container">
+        <h1>Security Logs</h1>
+        <p class="muted small">Short, plain technical updates. One event per entry.</p>
+        <ul>
+          <!-- LOGS:START -->
+          <li><a href="/security/logs/2025-08-18-tools-keys-audit.html">2025-08-18 — Tools keys audit</a></li>
+          <li><a href="/security/logs/2025-08-18-ssh-hardening.html">2025-08-18 — SSH hardening</a></li>
+          <li><a href="/security/logs/2025-08-17-hardening-web-server.html">2025-08-17 — Hardening web server</a></li>
+          <li><a href="/security/logs/2025-08-17-hardening-web-server.html">2025-08-15 — DNS setup</a></li>
+          <!-- LOGS:END -->
         </ul>
-      </section>
+      </main>
 
       <footer data-include="/components/footer.html"></footer>
     </main>

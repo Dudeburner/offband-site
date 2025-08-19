@@ -2,55 +2,36 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
+  <title>404 • Offband</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Not found • Offband</title>
-  <meta name="robots" content="noindex,follow">
-  <meta name="description" content="The page you were looking for doesn’t exist. Explore Offband’s blog, tools, and writeups instead.">
-
-  <!-- OG/Twitter (same as others) -->
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="Offband">
-  <meta property="og:title" content="Offband — Security-first community lab">
-  <meta property="og:description" content="Hands-on security notes, OSINT experiments, and small tools — built in public.">
-  <meta property="og:url" content="https://offband.dev/">
-  <meta property="og:image" content="https://offband.dev/assets/og-512.png">
-  <meta name="twitter:card" content="summary_large_image">
-
+  <meta http-equiv="refresh" content="5;url=/">
   <link rel="stylesheet" href="/assets/site.css">
-  <meta name="theme-color" content="#39FF14">
-
   <style>
-    .notfound-hero {
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: #000;
+      color: #39FF14;
+      font-family: monospace;
       text-align: center;
-      margin: 4rem auto;
+      padding: 2rem;
+    }
+    .wrap {
       max-width: 600px;
     }
-    .notfound-hero h1 { font-size: 2rem; margin-bottom: .75rem; }
-    .notfound-hero p { margin-bottom: 1.25rem; color: var(--muted); }
-    .notfound-hero .actions {
-      display: flex; justify-content: center; gap: .75rem; flex-wrap: wrap;
-    }
+    h1 { font-size: 2rem; margin-bottom: 1rem; }
+    p { margin-bottom: .5rem; }
+    .muted { color: #666; }
   </style>
 </head>
 <body>
-  <main class="container">
-    <section class="notfound-hero">
-      <a class="brand-badge" href="/">
-        <img class="badge-img" src="/assets/logo-badge.svg" alt="Offband logo">
-        <span class="brand-text">Offband</span>
-      </a>
-      <h1>Page not found</h1>
-      <p>The path you tried doesn’t exist. You can go back home or explore the blog.</p>
-      <div class="actions">
-        <a class="btn" href="/">Go home</a>
-        <a class="btn ghost" href="/blog/">Read the blog</a>
-      </div>
-    </section>
-  </main>
-  <div class="container" style="text-align:center; margin-top:2rem;">
-    <p class="small muted">© <span id="y"></span> Offband</p>
+  <div class="wrap">
+    <h1>404 — Offband Unreachable</h1>
+    <p>Looks like you took a wrong turn.</p>
+    <p class="muted">Redirecting you back to safety in 5 seconds…</p>
+    <p><a href="/" class="btn">Return to Offband</a></p>
   </div>
-
-  <script src="/assets/year.js" defer></script>
 </body>
 </html>

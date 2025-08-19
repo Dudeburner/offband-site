@@ -1,10 +1,9 @@
 # macOS
 .DS_Store
 
-# Local tooling kept outside the public site
-tools/
-offband.sh
-offband-email.sh
+# Ignore everything in tools/
+tools/*
+!tools/new-log.sh
 
 # Private/secret material (never commit)
 .gnupg/

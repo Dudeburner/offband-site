@@ -1,42 +1,13 @@
 <!doctype html><html><head>
   <meta charset="utf-8"><title>2025-08-17 — Hardening web server</title>
-  <meta name="robots" content="noindex,follow"><!-- logs hidden from index; robots.txt already disallows the directory -->
+  <meta name="robots" content="noindex,follow">
   <link rel="stylesheet" href="/assets/site.css">
+  <script defer src="/assets/include.js"></script>
 </head><body>
+<div data-include="/components/topbar.html"></div>
 <div data-include="/components/sidebar.html"></div>
 <main class="container">
-  <h1>2025-08-17 — Hardening web server for deployment</h1>
-
-  <h2>Goal</h2>
-  <p>Stand up a public-facing web server with minimal attack surface, proper monitoring, and baseline security controls before promotion.</p>
-
-  <h2>Steps</h2>
-  <ol>
-    <li>Provision server …</li>
-    <li>Install and configure Nginx …</li>
-    <li>Deploy site …</li>
-    <li>Baseline monitoring …</li>
-    <li>Basic hardening …</li>
-  </ol>
-
-  <h2>Issues & Fixes</h2>
-  <ul>
-    <li>Nginx config test failed → corrected symlink and reloaded.</li>
-    <li>rsync skipped dotfiles → fixed include/exclude and redeployed.</li>
-    <li>Monitoring disk I/O blank → restarted agent.</li>
-    <li>SSH brute attempts → enabled fail2ban with aggressive bantime.</li>
-    <li>Firewall blocked HTTP → opened 80/443.</li>
-  </ul>
-
-  <h2>Result</h2>
-  <p>Server live behind Nginx, firewall restricted, monitoring online; ready for TLS + deploy automation.</p>
-
-  <h2>Next actions</h2>
-  <ul>
-    <li>Enable TLS via Let’s Encrypt + auto-renew.</li>
-    <li>Add deploy automation (rsync hook or CI runner).</li>
-    <li>Configure uptime & resource alerts.</li>
-  </ul>
+  <h1>2025-08-17 — Hardening web server</h1>
+  <p><time>2025-08-17 16:45</time> • Before putting the site online we locked down the server with <code>ufw</code>. Only ports 80 and 443 were opened for web traffic, and SSH was limited. This cut off unnecessary services from being exposed and gave us a cleaner, safer baseline to build on.</p>
 </main>
-<script src="/assets/sidebar-init.js"></script>
 </body></html>
