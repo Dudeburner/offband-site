@@ -1,5 +1,10 @@
 <nav class="sidebar" aria-label="Site navigation">
-  <ul class="tree">
+  <div class="toolbar" aria-label="Sidebar controls">
+    <button type="button" class="collapse-all" aria-expanded="true" aria-controls="sidebar-tree">Collapse all</button>
+    <button type="button" class="expand-all" aria-controls="sidebar-tree">Expand all</button>
+  </div>
+
+  <ul id="sidebar-tree" class="tree">
     <!-- Home -->
     <li>
       <div class="row">
@@ -16,6 +21,7 @@
       <ul>
         <li><div class="row"><a href="/writeups/">All writeups</a></div></li>
         <li><div class="row"><a href="/writeups/posts/coming-soon.html">Coming soon…</a></div></li>
+        <li class="auto-insert auto-writeups"></li>
       </ul>
     </li>
 
@@ -28,6 +34,7 @@
       <ul>
         <li><div class="row"><a href="/security/">Overview</a></div></li>
         <li><div class="row"><a href="/security/logs/">Logs</a></div></li>
+        <li class="auto-insert auto-logs"></li>
       </ul>
     </li>
 
@@ -47,6 +54,7 @@
   <script>
   (function () {
     const STORAGE_KEY = 'sidebar.v1';
+    const BODY_COLLAPSE_CLASS = 'sidebar-collapsed';
     const nav = document.currentScript.closest('nav.sidebar') || document.currentScript.parentElement;
     if (!nav) return;
 
@@ -80,6 +88,28 @@
       persist();
     }
 
+    function collapseAll() {
+      nav.querySelectorAll('.folder').forEach((li) => setOpen(li, false));
+      try { document.body.classList.add(BODY_COLLAPSE_CLASS); } catch (_) {}
+      persist();
+    }
+
+    function expandAll() {
+      nav.querySelectorAll('.folder').forEach((li) => setOpen(li, true));
+      try { document.body.classList.remove(BODY_COLLAPSE_CLASS); } catch (_) {}
+      persist();
+    }
+
+    // Toolbar controls (collapse/expand all)
+    (function(){
+      const toolbar = nav.querySelector('.toolbar');
+      if (!toolbar) return;
+      const btnCollapse = toolbar.querySelector('.collapse-all');
+      const btnExpand = toolbar.querySelector('.expand-all');
+      if (btnCollapse) btnCollapse.addEventListener('click', collapseAll);
+      if (btnExpand) btnExpand.addEventListener('click', expandAll);
+    })();
+
     // Make the whole row clickable
     nav.querySelectorAll('.folder > .row').forEach((row) => {
       const li = row.parentElement;
@@ -109,6 +139,47 @@
         if (parent) setOpen(parent, true);
       }
     });
+
+    // --- Auto-populate recent items from writeups and logs ---
+    (async function autoPopulate(){
+      try {
+        const addItems = (placeholder, items) => {
+          if (!placeholder || !items || !items.length) return;
+          const frag = document.createDocumentFragment();
+          items.forEach(({href, text}) => {
+            const li = document.createElement('li');
+            const row = document.createElement('div');
+            row.className = 'row';
+            const a = document.createElement('a');
+            a.href = href; a.textContent = text || href;
+            row.appendChild(a); li.appendChild(row); frag.appendChild(li);
+          });
+          placeholder.replaceWith(frag);
+        };
+
+        const getLinks = async (url, filterFn, max=5) => {
+          const res = await fetch(url, {credentials: 'omit'});
+          if (!res.ok) throw new Error('fetch failed: ' + url);
+          const html = await res.text();
+          const doc = new DOMParser().parseFromString(html, 'text/html');
+          const links = Array.from(doc.querySelectorAll('a[href]'))
+            .map(a => ({href: a.getAttribute('href'), text: (a.textContent||'').trim()}))
+            .filter(({href, text}) => href && filterFn(href, text));
+          const norm = (h) => (/^https?:\/\//i.test(h)) ? h : new URL(h, url).pathname;
+          return links.slice(0, max).map(({href, text}) => ({href: norm(href), text}));
+        };
+
+        try {
+          const writeups = await getLinks('/writeups/', (href) => /\/writeups\//.test(href) && !/\/?index\.html?$/.test(href), 5);
+          addItems(nav.querySelector('.auto-writeups'), writeups);
+        } catch(_){ }
+
+        try {
+          const logs = await getLinks('/security/logs/', (href) => /\/security\/logs\//.test(href) && !/\/?index\.html?$/.test(href), 5);
+          addItems(nav.querySelector('.auto-logs'), logs);
+        } catch(_){ }
+      } catch(_){ }
+    })();
   })();
   </script>
 </nav>

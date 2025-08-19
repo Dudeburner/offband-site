@@ -1,7 +1,0 @@
-Contact: mailto:contact@offband.dev
-Contact: mailto:security@offband.dev
-Policy: https://offband.dev/security/
-Encryption: https://offband.dev/assets/pgp/offband.asc
-Acknowledgments: https://offband.dev/security/acknowledgments.html
-Preferred-Languages: en
-Canonical: https://offband.dev/security.txt

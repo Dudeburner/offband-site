@@ -1,6 +1,5 @@
 # Offband robots.txt
 User-agent: *
-Disallow: /security/logs/
 
 Disallow: /templates/
 

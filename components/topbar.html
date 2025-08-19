@@ -1,63 +1,38 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Offband</title>
-  <link rel="stylesheet" href="/styles.css" />
-</head>
-<body class="has-hero home">
-  <!-- Include topbar -->
-  <include src="/components/topbar.html" />
+<header class="topbar" role="banner">
+  <div class="container">
+    <!-- Left: brand -->
+    <a href="/" class="brand" aria-label="Offband home">
+      <img class="logo-badge" src="/assets/logo-badge.svg" alt="Offband logo" width="28" height="28" />
+      <span class="brand-name">Offband</span>
+    </a>
 
-  <main class="layout">
-    <!-- Sidebar is present in DOM but hidden on .home via CSS; keeps structure consistent across pages -->
-    <aside id="sidebar" class="sidebar" aria-hidden="true"></aside>
-
-    <div class="content">
-      <!-- LOBBY HERO -->
-      <section class="card hero hero--center">
-        <div class="brandmark">
-          <img class="logo-badge" src="/assets/logo-badge.svg" alt="" aria-hidden="true" />
-          <strong>Offband</strong>
-        </div>
-        <p class="lede">Hands‑on security notes and small operator tools — built in public.</p>
-        <p class="subtle">Homelab hardening, OSINT workflows, and repeatable setups you can clone, adapt, and ship.</p>
-        <div class="hero__actions">
-          <a class="btn btn--primary" href="/writeups/">Read writeups</a>
-          <a class="btn" href="/security/">See dashboard</a>
-        </div>
-      </section>
-
-      <!-- COMMUNITY CTA -->
-      <section class="card">
-        <h2>Community</h2>
-        <p class="subtle">Want to help test, report bugs, or try challenges? Start with the security overview for legal/ethical testing and reporting steps.</p>
-        <div class="hero__actions">
-          <a class="btn" href="/security/">Get involved</a>
-          <a class="btn" href="/security/logs/">View logs</a>
-        </div>
-      </section>
-
-      <!-- FEATURED WRITEUP (manually curated) -->
-      <section class="card">
-        <h2>Featured writeup</h2>
-        <p><a href="/writeups/">Primer — structure &amp; style</a></p>
-        <p class="subtle">Standards for future writeups: layout, headings, code blocks, and “issues &amp; fixes”.</p>
-      </section>
-
-      <!-- LATEST FROM THE LOG (index is fine; single link keeps lobby uncluttered) -->
-      <section class="card">
-        <h2>Latest from the log</h2>
-        <p><a href="/security/logs/">Security log index</a></p>
-        <p class="subtle">Ubuntu → Nginx → firewall → monitoring. End to end.</p>
-      </section>
-    </div>
-  </main>
-
-  <!-- Include footer -->
-  <include src="/components/footer.html" />
-
-  <script src="/scripts/main.js"></script>
-</body>
-</html>
+    <!-- Right: badges + search -->
+    <nav class="badges" aria-label="Account & security">
+      <form class="site-search" role="search">
+        <input id="topbar-search" type="search" placeholder="Search…" aria-label="Search site" />
+      </form>
+      <a class="badge" href="/404.html" aria-label="Contact / account">
+        <img src="/assets/account-badge.svg" alt="" width="24" height="24" />
+      </a>
+      <a class="badge" href="/.well-known/security.txt" aria-label="security.txt">
+        <img src="/assets/logo-badge.svg" alt="" width="24" height="24" />
+      </a>
+    </nav>
+  </div>
+  <script>
+    (function(){
+      // Find the search form either as the previous element or by id
+      var container = document.currentScript && document.currentScript.previousElementSibling;
+      var form = (container && container.querySelector && container.querySelector('form.site-search')) || (document.getElementById('topbar-search') && document.getElementById('topbar-search').form);
+      if (!form) return;
+      form.addEventListener('submit', function(e){
+        e.preventDefault();
+        var input = form.querySelector('input[type="search"]');
+        var q = (input && input.value) ? input.value.trim() : '';
+        if (!q) return;
+        // Redirect into writeups with q param (hookable by writeups.js later)
+        window.location.href = '/writeups/?q=' + encodeURIComponent(q);
+      });
+    })();
+  </script>
+</header>
