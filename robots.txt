@@ -6,6 +6,7 @@ Disallow: /templates/
 
 Disallow: /tools/
 
+Allow: /.well-known/
 Allow: /
 
 Sitemap: https://offband.dev/sitemap.xml

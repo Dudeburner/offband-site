@@ -6,10 +6,15 @@
   <title>Offband — Home</title>
   <meta name="description" content="Hands-on security notes and small operator tools. Built in public." />
   <link rel="stylesheet" href="/assets/site.css" />
+  <style>
+    /* Home page layout: 75% content column with sidebar visible */
+    #home .layout{ max-width:75vw; }
+    #home .content{ max-width:75vw; margin:0 auto; }
+  </style>
   <script defer src="/assets/include.js"></script>
   <script defer src="/assets/sidebar.js"></script>
 </head>
-<body class="has-hero home">
+<body id="home" class="has-hero">
   <div data-include="/components/topbar.html"></div>
 
   <div class="layout">
@@ -51,27 +56,6 @@
         </p>
         <a class="btn" href="/security/">Get involved</a>
       </section>
-
-      <article class="card feature">
-        <h3>Featured writeup</h3>
-        <a class="block-link" href="/writeups/posts/coming-soon.html">
-          Primer — structure &amp; style
-        </a>
-        <p class="muted">
-          Standards for future writeups: layout, headings, code blocks, and
-          “issues &amp; fixes”.
-        </p>
-      </article>
-
-      <article class="card feature">
-        <h3>Latest from the log</h3>
-        <a class="block-link" href="/security/logs/2025-08-17-hardening-web-server.html">
-          Hardening web server for deployment
-        </a>
-        <p class="muted">
-          Ubuntu → Nginx → firewall → monitoring. End to end.
-        </p>
-      </article>
 
       <!-- Footer (component include) -->
       <footer data-include="/components/footer.html"></footer>

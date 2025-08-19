@@ -6,13 +6,21 @@
   <title>Security · Offband</title>
   <meta name="description" content="Snapshot of defenses, recent activity, and reporting flows." />
   <link rel="stylesheet" href="/assets/site.css" />
+  <style>
+    /* Dashboard grid uses the shared .cards wrapper; this adds subtle 3D hover */
+    .dash-grid.cards{ margin-top:.5rem; }
+    .card--3d{ perspective: 800px; }
+    .card--3d .viz3d{ height:140px; border:1px dashed var(--border); border-radius:10px; background:rgba(255,255,255,.03); }
+    .card--3d:hover{ transform: translateY(-2px); }
+    .card--3d:hover .viz3d{ transform: rotateX(3deg) rotateY(-3deg); transform-origin: 50% 50%; transition: transform .2s ease; }
+    .dash-grid .card h3{ margin-bottom:.4rem; }
+  </style>
   <script defer src="/assets/include.js"></script>
   <script defer src="/assets/sidebar.js"></script>
   <script defer src="/assets/security.js"></script>
 </head>
 <body class="has-hero">
   <div data-include="/components/topbar.html"></div>
-  </header>
 
   <div class="layout">
     <aside id="sidebar" data-include="/components/sidebar.html"></aside>
@@ -29,6 +37,52 @@
           <a class="btn btn--primary" href="/security/logs/">Open logs</a>
           <a class="btn" href="/writeups/">Related writeups</a>
         </div>
+      </section>
+
+      <section class="dash-grid cards" aria-label="Overview tiles">
+        <article class="card card--3d">
+          <h3>Traffic</h3>
+          <div class="viz3d" aria-hidden="true"></div>
+          <p class="small muted">Requests, status mix</p>
+        </article>
+        <article class="card card--3d">
+          <h3>Auth / SSH</h3>
+          <div class="viz3d" aria-hidden="true"></div>
+          <p class="small muted">Attempts, bans</p>
+        </article>
+        <article class="card card--3d">
+          <h3>Bots &amp; scans</h3>
+          <div class="viz3d" aria-hidden="true"></div>
+          <p class="small muted">Noise level</p>
+        </article>
+        <article class="card card--3d">
+          <h3>Pipeline</h3>
+          <div class="viz3d" aria-hidden="true"></div>
+          <p class="small muted">Events → logs</p>
+        </article>
+      </section>
+
+      <section class="feature-grid grid-3" aria-label="At-a-glance">
+        <article class="card tile"><h3>Last update</h3><div class="kpi" id="kpi-updated">—</div><div class="meta">from latest log</div></article>
+        <article class="card tile"><h3>SSH bans</h3><div class="kpi" id="kpi-bans"><span class="ok">0</span></div><div class="meta">recent highlights</div></article>
+        <article class="card tile"><h3>Bot noise</h3><div class="kpi" id="kpi-bots"><span class="ok">0</span></div><div class="meta">recent highlights</div></article>
+      </section>
+
+      <section class="card section" aria-label="Tools">
+        <h3>Tools</h3>
+        <ul class="list-tight">
+          <li><a href="/tools/">Tool suite overview</a></li>
+          <li><a href="/tools/new-log.html">Generate log template</a> <span class="small muted">(scripts/new-log.sh)</span></li>
+          <li><a href="/tools/flush.html">Flush &amp; publish</a> <span class="small muted">(offband-flush)</span></li>
+          <li><a href="/tools/health.html">Health check</a> <span class="small muted">(offband-health)</span></li>
+        </ul>
+        <p class="small muted">Links can point to docs or static helpers; execution stays server-side.</p>
+      </section>
+
+      <section class="card section" aria-label="Recent activity">
+        <h3>Recent activity</h3>
+        <ul class="post-list" id="recent-logs"></ul>
+        <p class="small muted">Full history in the <a href="/security/logs/">security log</a>.</p>
       </section>
 
       <section class="feature-grid grid-2">

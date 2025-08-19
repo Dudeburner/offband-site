@@ -11,7 +11,6 @@
 </head>
 <body class="has-hero">
   <div data-include="/components/topbar.html"></div>
-  </header>
 
   <div class="layout">
     <aside id="sidebar" data-include="/components/sidebar.html"></aside>
@@ -22,33 +21,53 @@
           <img class="logo-badge" src="/assets/logo-badge.svg" alt="" aria-hidden="true" />
           Writeups
         </h1>
-        <p class="lede">Operator‑grade tutorials, case studies, and notes. No fluff.</p>
-        <p class="subtle">Expect runnable steps, tight scope, and “issues &amp; fixes.”</p>
+        <p class="lede">Operator‑grade tutorials, case studies, and field notes — built in public.</p>
+        <p class="subtle">What you’ll find here: reproducible steps, tight scope, and real "issues → fixes" with trade‑offs explained in plain language.</p>
       </section>
 
-      <section class="feature-grid grid-2">
-        <article class="card feature">
-          <h3>Featured</h3>
-          <a class="block-link" href="/security/logs/2025-08-17-hardening-web-server.html">
-            Hardening web server for deployment
-          </a>
-          <p class="muted">Ubuntu → Nginx → firewall → monitoring. End to end.</p>
-        </article>
+      <!-- Library tools: search + categories -->
+      <section class="card" aria-label="Library tools">
+        <div class="searchbar" role="search">
+          <input id="wu-search" type="search" placeholder="Search writeups (title, keywords)…" aria-label="Search writeups" />
+          <button class="btn" id="wu-clear" aria-label="Clear search">Clear</button>
+        </div>
+        <div class="hr"></div>
+        <div class="cats" aria-label="Categories">
+          <button class="pill" data-filter="all" aria-pressed="true">All</button>
+          <button class="pill" data-filter="security">Security</button>
+          <button class="pill" data-filter="networking">Networking</button>
+          <button class="pill" data-filter="tooling">Tooling</button>
+          <button class="pill" data-filter="meta">Meta</button>
+        </div>
+      </section>
 
-        <article class="card feature">
-          <h3>Primer</h3>
-          <a class="block-link" href="/writeups/posts/coming-soon.html">
-            Primer — structure &amp; style
-          </a>
-          <p class="muted">Layout, headings, code blocks, and “issues &amp; fixes”.</p>
-        </article>
+      <!-- Auto‑featured: last three posts (error‑tolerant) -->
+      <section class="card" aria-label="Featured writeups">
+        <h2>Featured</h2>
+        <div id="featured-grid" class="cards"></div>
+        <p class="small muted" id="featured-empty" hidden>No posts yet — they’ll appear here as you publish.</p>
+      </section>
+
+      <!-- Categories visual (button table) -->
+      <section class="card" aria-label="Explore by category">
+        <h2>Explore by category</h2>
+        <div class="cards" id="cat-cards">
+          <article class="card"><h3>Security</h3><p class="muted">Hardening, monitoring, incident notes.</p></article>
+          <article class="card"><h3>Networking</h3><p class="muted">DNS, TLS, proxies, routing.</p></article>
+          <article class="card"><h3>Tooling</h3><p class="muted">Scripts, pipelines, automation.</p></article>
+          <article class="card"><h3>Meta</h3><p class="muted">Project structure, writing process.</p></article>
+        </div>
       </section>
 
       <section class="card">
         <h2>All writeups</h2>
-        <ul class="list-tight">
-          <li><a href="/security/logs/2025-08-17-hardening-web-server.html">Hardening web server for deployment</a></li>
-          <li><a href="/writeups/posts/coming-soon.html">Primer — structure &amp; style</a></li>
+        <ul id="all-writeups" class="list-tight">
+          <li data-tags="security,nginx,server">
+            <a href="/security/logs/2025-08-17-hardening-web-server.html">Hardening web server for deployment</a>
+          </li>
+          <li data-tags="meta,primer,style">
+            <a href="/writeups/posts/coming-soon.html">Primer — structure &amp; style</a>
+          </li>
           <!-- add more as they land -->
         </ul>
       </section>
@@ -56,5 +75,72 @@
       <footer data-include="/components/footer.html"></footer>
     </main>
   </div>
+<script>
+(function(){
+  const list = document.getElementById('all-writeups');
+  const featured = document.getElementById('featured-grid');
+  const featuredEmpty = document.getElementById('featured-empty');
+  const search = document.getElementById('wu-search');
+  const clearBtn = document.getElementById('wu-clear');
+  const catBar = document.querySelector('.cats');
+
+  if (!list) return;
+
+  function items(){ return Array.from(list.querySelectorAll('li')); }
+  function textOf(el){ return (el.textContent||'').toLowerCase(); }
+
+  // FEATURED: take the most recent up to 3 (top of list), tolerate <3
+  try {
+    const links = items().slice(0,3).map(li => li.querySelector('a')).filter(Boolean);
+    if (links.length){
+      links.forEach(a => {
+        const card = document.createElement('article');
+        card.className = 'card';
+        const h = document.createElement('h3');
+        h.textContent = a.textContent.trim();
+        const p = document.createElement('p');
+        p.className = 'muted';
+        p.textContent = a.href;
+        const link = document.createElement('a');
+        link.className = 'btn';
+        link.href = a.getAttribute('href');
+        link.textContent = 'Read';
+        card.append(h,p,link);
+        featured && featured.appendChild(card);
+      });
+      if (featuredEmpty) featuredEmpty.hidden = true;
+    } else {
+      if (featuredEmpty) featuredEmpty.hidden = false;
+    }
+  } catch(e) { if (featuredEmpty) featuredEmpty.hidden = false; }
+
+  // FILTERING (search + categories)
+  let activeCat = 'all';
+  function applyFilter(){
+    const q = (search && search.value || '').toLowerCase();
+    items().forEach(li => {
+      const tags = (li.getAttribute('data-tags')||'').toLowerCase();
+      const title = textOf(li);
+      const catHit = (activeCat==='all') || tags.includes(activeCat) || title.includes(activeCat);
+      const qHit = !q || title.includes(q) || tags.includes(q);
+      li.style.display = (catHit && qHit) ? '' : 'none';
+    });
+  }
+
+  if (search){ search.addEventListener('input', applyFilter); }
+  if (clearBtn){ clearBtn.addEventListener('click', () => { search.value=''; applyFilter(); }); }
+  if (catBar){
+    catBar.addEventListener('click', (e)=>{
+      const b = e.target.closest('button[data-filter]');
+      if (!b) return;
+      activeCat = b.dataset.filter;
+      catBar.querySelectorAll('button[data-filter]').forEach(x=>x.setAttribute('aria-pressed', x===b ? 'true':'false'));
+      applyFilter();
+    });
+  }
+
+  applyFilter();
+})();
+</script>
 </body>
 </html>
