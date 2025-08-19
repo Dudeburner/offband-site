@@ -1,37 +1,43 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>404 • Offband</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta http-equiv="refresh" content="5;url=/">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>404 — Offband</title>
+  <link rel="preload" href="/assets/site.css" as="style">
   <link rel="stylesheet" href="/assets/site.css">
-  <style>
-    body {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      background: #000;
-      color: #39FF14;
-      font-family: monospace;
-      text-align: center;
-      padding: 2rem;
-    }
-    .wrap {
-      max-width: 600px;
-    }
-    h1 { font-size: 2rem; margin-bottom: 1rem; }
-    p { margin-bottom: .5rem; }
-    .muted { color: #666; }
-  </style>
 </head>
-<body>
-  <div class="wrap">
-    <h1>404 — Offband Unreachable</h1>
-    <p>Looks like you took a wrong turn.</p>
-    <p class="muted">Redirecting you back to safety in 5 seconds…</p>
-    <p><a href="/" class="btn">Return to Offband</a></p>
-  </div>
+<body class="has-hero">
+  <div data-include="/components/topbar.html"></div>
+
+  <main class="layout">
+    <section class="notfound-hero card">
+      <div class="brandmark center" style="justify-content:center;">
+        <img class="logo-badge" src="/assets/logo-badge.svg" alt="" aria-hidden="true">
+        <strong>Offband</strong>
+      </div>
+      <h1>404 — Lost in the void</h1>
+      <p>We couldnt find that page. You can head back to the lobby or jump to the security lab.</p>
+      <div class="actions">
+        <a class="btn btn--primary" href="/">Go to lobby</a>
+        <a class="btn" href="/security/">See dashboard</a>
+        <a class="btn" href="/security/logs/">View logs</a>
+      </div>
+      <p class="small muted" id="redir-note">Redirecting to the lobby in <span id="redir">7</span>s…</p>
+    </section>
+  </main>
+
+  <div data-include="/components/footer.html"></div>
+
+  <script src="/assets/include.js" defer></script>
+  <script>
+    (function(){
+      var s = 7, el = document.getElementById('redir');
+      var t = setInterval(function(){
+        s--; if (el) el.textContent = s;
+        if (s <= 0) { clearInterval(t); window.location.href = '/'; }
+      }, 1000);
+    })();
+  </script>
 </body>
 </html>
