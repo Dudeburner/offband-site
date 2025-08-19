@@ -40,3 +40,50 @@
     empty.style.display = 'none';
   }
 })();
+
+(function () {
+  const out = () => document.getElementById('pgp-armored')?.value?.trim() || '';
+
+  // Copy to clipboard
+  document.getElementById('pgp-copy')?.addEventListener('click', async () => {
+    const text = out();
+    if (!text) return;
+    try {
+      await navigator.clipboard.writeText(text);
+      alert('Encrypted text copied to clipboard.');
+    } catch (e) {
+      alert('Copy failed. Select the text and copy manually.');
+    }
+  });
+
+  // Download as .asc
+  document.getElementById('pgp-download')?.addEventListener('click', () => {
+    const text = out();
+    if (!text) return;
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'offband-message.asc';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  });
+
+  // Open default mail client with armored blob in body
+  document.getElementById('pgp-email')?.addEventListener('click', (ev) => {
+    ev.preventDefault();
+    const text = out();
+    if (!text) return;
+    const to = document.getElementById('pgp-recipient')?.value || 'connect@offband.dev';
+    const subject = encodeURIComponent('Encrypted message for Offband');
+    const body = encodeURIComponent(text);
+    window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
+  });
+
+  // Optional: bind encrypt button if your existing code expects a different id
+  document.getElementById('pgp-encrypt')?.addEventListener('click', () => {
+    // If your encrypt function is already wired elsewhere, you can remove this.
+    // Otherwise, call your existing encrypt routine here.
+    // e.g. window.offbandEncrypt && window.offbandEncrypt();
+  });
+})();

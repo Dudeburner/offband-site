@@ -51,36 +51,32 @@
           </p>
         </article>
 
-        <article class="card">
-          <h3>Encrypt a message</h3>
-          <p class="muted">Browser‑side PGP. Nothing leaves your machine until you send it.</p>
-          <p><a class="btn" href="/connect/#encrypt">Open PGP widget</a></p>
-        </article>
-      </section>
-
 	  <section class="card" id="pgp-widget">
-		<h3>Encrypt a message</h3>
-		<p>Browser‑side PGP. Nothing leaves your machine until you send it.</p>
+	    <h3>Encrypt a message</h3>
+	    <p class="muted">Browser‑side PGP. Nothing leaves your machine until you send it.</p>
 
-		<label>Recipient
-		  <select id="pgp-recipient">
-		    <option value="connect@offband.dev">connect@offband.dev</option>
-		    <option value="security@offband.dev">security@offband.dev</option>
-		  </select>
-		</label>
+	    <label>Recipient
+	      <select id="pgp-recipient">
+	        <option value="connect@offband.dev">connect@offband.dev</option>
+	        <option value="security@offband.dev">security@offband.dev</option>
+	      </select>
+	    </label>
 
-		<label>Message
-		  <textarea id="pgp-plain" rows="6" placeholder="Write your message…"></textarea>
-		</label>
+	    <label>Message
+	      <textarea id="pgp-plain" rows="6" placeholder="Write your message…"></textarea>
+	    </label>
 
-		<div style="margin: 8px 0;">
-		  <button id="pgp-encrypt" class="btn btn--primary">Encrypt</button>
-		</div>
+	    <div class="actions" style="margin: 8px 0;">
+	      <button class="btn btn--primary" id="pgp-encrypt">Encrypt</button>
+	      <button class="btn" id="pgp-copy">Copy</button>
+	      <button class="btn" id="pgp-download">Download</button>
+	      <a class="btn" id="pgp-email" href="#">Open in email</a>
+	    </div>
 
-		<label>Encrypted (ASCII‑armored)
-		  <textarea id="pgp-armored" rows="10" readonly placeholder="-----BEGIN PGP MESSAGE-----"></textarea>
-		</label>
-      </section>
+	    <label>Encrypted (ASCII‑armored)
+	      <textarea id="pgp-armored" rows="8" readonly placeholder="-----BEGIN PGP MESSAGE-----"></textarea>
+	    </label>
+	  </section>
 
       <footer data-include="/components/footer.html"></footer>
     </main>
