@@ -5,6 +5,8 @@ Disallow: /templates/
 
 Disallow: /tools/
 
+Disallow: /scripts/
+
 Allow: /.well-known/
 Allow: /
 

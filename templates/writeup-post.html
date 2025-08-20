@@ -19,6 +19,7 @@
 
   <link rel="icon" type="image/svg+xml" href="/assets/logo-badge.svg?v=2025-08-18f">
   <link rel="alternate icon" type="image/png" href="/assets/og-512.png" sizes="512x512">
+  <link rel="preload" href="/assets/site.css?v=2025-08-18f" as="style">
   <link rel="stylesheet" href="/assets/site.css?v=2025-08-18f">
 
   <!-- JSON‑LD (Article) -->
@@ -38,68 +39,62 @@
 </head>
 <body class="section-writeups">
   <!-- Top bar -->
-  <header class="topbar">
-    <div data-include="/components/topbar.html"></div>
-  </header>
+  <div data-include="/components/topbar.html"></div>
 
   <!-- Centered app layout -->
-  <main class="wrap layout">
-    <!-- Sidebar -->
-    <aside class="sidebar-shell">
-      <div data-include="/components/sidebar.html?v=2025-08-18f"></div>
-    </aside>
+  <div class="layout">
+    <aside id="sidebar" data-include="/components/sidebar.html?v=2025-08-18f"></aside>
+    <main id="content" class="content">
+      <article class="card prose">
+        <header>
+          <p class="small muted"><a href="/writeups/">Writeups</a> / {{CATEGORY}}</p>
+          <h1>{{TITLE}}</h1>
+          <p class="small muted">Published <time datetime="{{DATE_PUBLISHED}}">{{HUMAN_DATE}}</time> · Updated <time datetime="{{DATE_MODIFIED}}">{{HUMAN_MOD}}</time> · <span id="readtime">~5 min read</span></p>
+          <p class="small muted">Tags: <span class="tag">{{TAG1}}</span> <span class="tag">{{TAG2}}</span> <span class="tag">{{TAG3}}</span></p>
+        </header>
 
-    <!-- Content -->
-    <article class="content container">
-      <header>
-        <p class="small muted"><a href="/writeups/">Writeups</a> / {{CATEGORY}}</p>
-        <h1>{{TITLE}}</h1>
-        <p class="small muted">Published <time datetime="{{DATE_PUBLISHED}}">{{HUMAN_DATE}}</time> · Updated <time datetime="{{DATE_MODIFIED}}">{{HUMAN_MOD}}</time> · <span id="readtime">~5 min read</span></p>
-        <p class="small muted">Tags: <span class="tag">{{TAG1}}</span> <span class="tag">{{TAG2}}</span> <span class="tag">{{TAG3}}</span></p>
-      </header>
+        <!-- Optional table of contents -->
+        <nav class="card" aria-label="On this page" id="toc" style="display:none;"></nav>
 
-      <!-- Optional table of contents -->
-      <nav class="card" aria-label="On this page" id="toc" style="display:none;"></nav>
+        <!-- Post body -->
+        <section id="post">
+          <h2>Goal</h2>
+          <p>{{ONE_SENTENCE_GOAL}}</p>
 
-      <!-- Post body -->
-      <section id="post">
-        <h2>Goal</h2>
-        <p>{{ONE_SENTENCE_GOAL}}</p>
+          <h2>Context</h2>
+          <p>{{WHY_THIS_MATTERS}}</p>
 
-        <h2>Context</h2>
-        <p>{{WHY_THIS_MATTERS}}</p>
+          <h2>Steps</h2>
+          <ol>
+            <li><strong>Step 1.</strong> …</li>
+            <li><strong>Step 2.</strong> …</li>
+          </ol>
 
-        <h2>Steps</h2>
-        <ol>
-          <li><strong>Step 1.</strong> …</li>
-          <li><strong>Step 2.</strong> …</li>
-        </ol>
+          <h2>Issues &amp; fixes</h2>
+          <ul>
+            <li><strong>Symptom:</strong> … <strong>Fix:</strong> …</li>
+          </ul>
 
-        <h2>Issues &amp; fixes</h2>
-        <ul>
-          <li><strong>Symptom:</strong> … <strong>Fix:</strong> …</li>
-        </ul>
+          <h2>Results</h2>
+          <p>{{WHAT_WORKS_NOW}}</p>
 
-        <h2>Results</h2>
-        <p>{{WHAT_WORKS_NOW}}</p>
+          <h2>Next actions</h2>
+          <ul>
+            <li>…</li>
+          </ul>
+        </section>
 
-        <h2>Next actions</h2>
-        <ul>
-          <li>…</li>
-        </ul>
-      </section>
-
-      <!-- Prev / Next -->
-      <div class="hr"></div>
-      <nav class="subnav" aria-label="Post navigation">
-        <a href="{{PREV_URL}}">← {{PREV_LABEL}}</a>
-        <a class="active" href="/writeups/">All writeups</a>
-        <a href="{{NEXT_URL}}">{{NEXT_LABEL}} →</a>
-      </nav>
-
+        <!-- Prev / Next -->
+        <div class="hr"></div>
+        <nav class="subnav" aria-label="Post navigation">
+          <a href="{{PREV_URL}}">← {{PREV_LABEL}}</a>
+          <a class="active" href="/writeups/">All writeups</a>
+          <a href="{{NEXT_URL}}">{{NEXT_LABEL}} →</a>
+        </nav>
+      </article>
       <div data-include="/components/footer.html?v=2025-08-18f"></div>
-    </article>
-  </main>
+    </main>
+  </div>
 
   <!-- Includes & init -->
   <script src="/assets/include.js" defer></script>

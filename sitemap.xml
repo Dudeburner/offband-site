@@ -1,15 +1,20 @@
+
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- Root -->
   <url><loc>https://offband.dev/</loc></url>
 
   <!-- Writeups -->
   <url><loc>https://offband.dev/writeups/</loc></url>
+  <url><loc>https://offband.dev/writeups/posts/2025-08-16-configuring-my-first-web-page.html</loc></url>
 
   <!-- Security -->
   <url><loc>https://offband.dev/security/</loc></url>
-
-  <!-- Logs index is allowed to exist but we've disallowed crawling it in robots -->
   <url><loc>https://offband.dev/security/logs/</loc></url>
+  <url><loc>https://offband.dev/security/logs/2025-08-17-dns-configuration.html</loc></url>
+  <url><loc>https://offband.dev/security/logs/2025-08-17-hardening-web-server.html</loc></url>
+  <url><loc>https://offband.dev/security/logs/2025-08-18-ssh-hardening.html</loc></url>
+  <url><loc>https://offband.dev/security/logs/2025-08-18-tools-keys-audit.html</loc></url>
 
   <!-- Connect -->
   <url><loc>https://offband.dev/connect/</loc></url>

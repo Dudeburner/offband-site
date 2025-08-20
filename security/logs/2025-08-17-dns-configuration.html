@@ -1,12 +1,29 @@
-<!doctype html><html><head>
-  <meta charset="utf-8"><title>2025-08-15 — DNS setup</title>
-  <meta name="robots" content="noindex,follow">
-  <link rel="stylesheet" href="/assets/site.css">
-</head><body>
-<div data-include="/components/sidebar.html"></div>
-<main class="container">
-  <h1>2025-08-15 — DNS setup</h1>
-  <p><time>2025-08-15 14:32</time> • Registered our domain and pointed A/AAAA records to the new server. Confirmed it resolved worldwide using <code>dig</code> and <code>nslookup</code>. This was the first step that made the project feel “real,” when offband.dev finally led somewhere instead of an error page(for now).</p>
-</main>
-<script src="/assets/sidebar-init.js"></script>
-</body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>2025-08-15 — DNS setup</title>
+  <meta name="robots" content="noindex,follow" />
+  <link rel="preload" href="/assets/site.css" as="style">
+  <link rel="stylesheet" href="/assets/site.css" />
+  <script defer src="/assets/include.js"></script>
+  <script defer src="/assets/sidebar.js"></script>
+</head>
+<body>
+  <div data-include="/components/topbar.html"></div>
+
+  <div class="layout">
+    <aside id="sidebar" data-include="/components/sidebar.html"></aside>
+
+    <main id="content" class="content">
+      <section class="card">
+        <h1>2025-08-15 — DNS setup</h1>
+        <p><time>2025-08-15 14:32</time> • Registered our domain and pointed A/AAAA records to the new server. Confirmed it resolved worldwide using <code>dig</code> and <code>nslookup</code>. This was the first step that made the project feel “real,” when offband.dev finally led somewhere instead of an error page (for now).</p>
+      </section>
+
+      <footer data-include="/components/footer.html"></footer>
+    </main>
+  </div>
+</body>
+</html>

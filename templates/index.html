@@ -13,27 +13,20 @@
   <link rel="alternate icon" type="image/png" href="/assets/og-512.png" sizes="512x512">
 
   <!-- CSS -->
+  <link rel="preload" href="/assets/site.css?v={{VER}}" as="style">
   <link rel="stylesheet" href="/assets/site.css?v={{VER}}">
 </head>
 <body class="section-{{SECTION}}">
   <!-- Top bar -->
   <div data-include="/components/topbar.html"></div>
-  </header>
 
-  <!-- Centered app layout -->
-  <main class="wrap layout">
-    <!-- Sidebar -->
-    <aside class="sidebar-shell">
-      <div data-include="/components/sidebar.html?v={{VER}}"></div>
-    </aside>
-
-    <!-- Page content -->
-    <section class="content container">
+  <div class="layout">
+    <aside id="sidebar" data-include="/components/sidebar.html?v={{VER}}"></aside>
+    <main id="content" class="content">
       {{CONTENT}}
-
-      <div data-include="/components/footer.html?v={{VER}}"></div>
-    </section>
-  </main>
+      <footer data-include="/components/footer.html?v={{VER}}"></footer>
+    </main>
+  </div>
 
   <!-- Includes & sidebar init -->
   <script src="/assets/include.js" defer></script>

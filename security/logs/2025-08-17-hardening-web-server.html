@@ -1,13 +1,29 @@
-<!doctype html><html><head>
-  <meta charset="utf-8"><title>2025-08-17 — Hardening web server</title>
-  <meta name="robots" content="noindex,follow">
-  <link rel="stylesheet" href="/assets/site.css">
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>2025-08-17 — Hardening web server</title>
+  <meta name="robots" content="noindex,follow" />
+  <link rel="preload" href="/assets/site.css" as="style">
+  <link rel="stylesheet" href="/assets/site.css" />
   <script defer src="/assets/include.js"></script>
-</head><body>
-<div data-include="/components/topbar.html"></div>
-<div data-include="/components/sidebar.html"></div>
-<main class="container">
-  <h1>2025-08-17 — Hardening web server</h1>
-  <p><time>2025-08-17 16:45</time> • Before putting the site online we locked down the server with <code>ufw</code>. Only ports 80 and 443 were opened for web traffic, and SSH was limited. This cut off unnecessary services from being exposed and gave us a cleaner, safer baseline to build on.</p>
-</main>
-</body></html>
+  <script defer src="/assets/sidebar.js"></script>
+</head>
+<body>
+  <div data-include="/components/topbar.html"></div>
+
+  <div class="layout">
+    <aside id="sidebar" data-include="/components/sidebar.html"></aside>
+
+    <main id="content" class="content">
+      <section class="card">
+        <h1>2025-08-17 — Hardening web server</h1>
+        <p><time>2025-08-17 16:45</time> • Before putting the site online we locked down the server with <code>ufw</code>. Only ports 80 and 443 were opened for web traffic, and SSH was limited. This cut off unnecessary services from being exposed and gave us a cleaner, safer baseline to build on.</p>
+      </section>
+
+      <footer data-include="/components/footer.html"></footer>
+    </main>
+  </div>
+</body>
+</html>

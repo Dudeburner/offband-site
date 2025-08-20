@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Configuring My First Web Page — 2025-08-16</title>
+  <meta name="description" content="Bringing offband.dev online: DNS → VM → Nginx → HTTPS, with notes on Cloudflare, UFW, and early deployment plumbing." />
+  <link rel="preload" href="/assets/site.css" as="style">
+  <link rel="stylesheet" href="/assets/site.css" />
+  <script defer src="/assets/include.js"></script>
+  <script defer src="/assets/sidebar.js"></script>
+</head>
+<body class="section-writeups">
+  <div data-include="/components/topbar.html"></div>
+
+  <div class="layout">
+    <aside id="sidebar" data-include="/components/sidebar.html"></aside>
+
+    <main id="content" class="content">
+      <section class="card hero">
+        <h1 class="brandmark">
+          <img class="logo-badge" src="/assets/logo-badge.svg" alt="" aria-hidden="true" />
+          Configuring My First Web Page
+        </h1>
+        <p class="subtle small">Published <time datetime="2025-08-16">2025‑08‑16</time></p>
+        <p class="subtle small">Tags: <span class="badge-chip">homelab</span> <span class="badge-chip">nginx</span> <span class="badge-chip">linode</span> <span class="badge-chip">cloudflare</span> <span class="badge-chip">dns</span> <span class="badge-chip">git-deploy</span> <span class="badge-chip">server‑hardening</span> <span class="badge-chip">ops</span></p>
+      </section>
+
+      <article class="card prose" id="post">
+        <h2>Goal</h2>
+        <p>The goal was to get a bare‑metal webpage online at <code>offband.dev</code> using a cloud VM (Linode/Akamai). This was a first deployment exercise: prove the chain works, DNS resolves, and content is served over HTTP/HTTPS. No styling or features yet—just a living placeholder page.</p>
+
+        <h2>Context</h2>
+        <ul>
+          <li><strong>OS:</strong> Ubuntu 24.04.3 LTS</li>
+          <li><strong>Provider:</strong> Linode via Akamai</li>
+          <li><strong>Domain:</strong> offband.dev (Porkbun, Cloudflare DNS in front)</li>
+          <li><strong>Tools:</strong> Nginx, git, Cloudflare proxy, UFW firewall</li>
+        </ul>
+
+        <h2>Steps</h2>
+        <ol>
+          <li>Register domain and connect it to Cloudflare.</li>
+          <li>Spin up a Linode VM with SSH key auth.</li>
+          <li>Install Nginx and serve a simple <code>index.html</code>.</li>
+          <li>Open firewall for HTTP/HTTPS.</li>
+          <li>Verify with browser + <code>curl</code>.</li>
+          <li>Automate deployment via git → server reset script.</li>
+          <li>Debugging / 4am bug.</li>
+        </ol>
+
+        <h2>Issues &amp; Fixes</h2>
+        <h3>Domain / DNS: Porkbun → Cloudflare</h3>
+        <p>We bought the domain via Porkbun (the UI is friendly and developer‑focused). For TLDs like <code>.dev</code>, <code>.app</code>, or <code>.ads</code>, note that HTTPS is required—addressed below. Keep Porkbun open; we’ll set up DNS in Cloudflare.</p>
+        <p>In Cloudflare, add the domain and let it scan current records. It provides two nameservers; replace Porkbun’s default four with those two (<code>&lt;name&gt;.ns.cloudflare.com</code>). Wait for status to become <em>Active</em> (use “Re‑check nameservers” if pending).</p>
+        <p>Create records:</p>
+        <pre><code>A @ → 45.79.217.101 (Proxy: ON, TTL: Auto)
+AAAA @ → 2600:3c02::2000:bcff:fe58:7390 (Proxy: ON, TTL: Auto)
+CNAME www → offband.dev (Proxy: ON)
+</code></pre>
+        <p>This yields <code>apex</code> + <code>www</code>, dual‑stack, through Cloudflare.</p>
+        <ul>
+          <li>Always Use HTTPS: ON</li>
+          <li>Automatic HTTPS Rewrites: ON</li>
+          <li>Minimum TLS: 1.2</li>
+          <li>HTTP/2 and HTTP/3: ON</li>
+        </ul>
+        <p>Redirect <code>www</code> → apex:</p>
+        <pre><code>Rules → Redirect Rules → Create rule
+If: Hostname equals www.offband.dev
+Then: Static redirect to https://offband.dev (301)
+</code></pre>
+        <p>During deploys, enable Dev Mode to bypass cache (<em>remember to turn it off after</em>).</p>
+
+        <h3>VM spin‑up &amp; hardening (Linode/Akamai, SSH keys, UFW)</h3>
+        <ul>
+          <li>Image: Ubuntu 24.04 LTS</li>
+          <li>Region: closest to you/users</li>
+          <li>Plan: Shared CPU (Nanode 1GB is fine for now)</li>
+          <li>Label: <code>offband-web-01</code></li>
+          <li>SSH Key: add your Mac public key (populates root; we’ll add a non‑root user in Part 2)</li>
+          <li>Password: required by UI, unused with key auth</li>
+          <li>Backups: optional (snapshots are fine early on)</li>
+        </ul>
+        <p>We briefly tried Linode Object Storage for static hosting, but caching headers/YAML got messy. A small VM with Nginx ended up simpler and more aligned with Offband’s theme. Sometimes the “old‑school” VM path is clearer than object storage/CDN while prototyping.</p>
+        <p><strong>Security note:</strong> If you stop here, at least install <code>ufw</code>, lock down SSH, and avoid leaving the box exposed.</p>
+
+        <h2>Result</h2>
+        <p>Site live at <a href="https://offband.dev" target="_blank" rel="noopener">https://offband.dev</a>.</p>
+        <p>We pointed <code>offband.dev</code> to a new Linode VM via Cloudflare (A+AAAA proxied; <code>www</code>→apex), set SSL to Full (strict) with Let’s Encrypt on the origin, forced HTTPS, and used Dev Mode during deploys.</p>
+
+        <h2>Next Actions</h2>
+        <h3>Part 2 — CLI hardening</h3>
+        <ul>
+          <li>Create a non‑root deploy user with SSH key‑only login.</li>
+          <li>Disable root SSH login.</li>
+          <li>Enable and configure <code>ufw</code> firewall.</li>
+          <li>Install <code>fail2ban</code> for brute‑force protection.</li>
+        </ul>
+        <h3>Web stack polish</h3>
+        <ul>
+          <li>Serve from <code>/var/www/offband</code> via Nginx.</li>
+          <li>Run Certbot for auto‑renewing Let’s Encrypt.</li>
+        </ul>
+        <h3>Deployment pipeline</h3>
+        <ul>
+          <li>Finalize GitHub → server pull (e.g., systemd timer every 30s).</li>
+          <li>Add logging/alerting for failed deploys.</li>
+        </ul>
+        <h3>Documentation</h3>
+        <ul>
+          <li>Turn these capture notes into a polished blog post (this page).</li>
+          <li>Highlight detours (object storage attempt, Cloudflare cache) as lessons learned.</li>
+        </ul>
+      </article>
+
+      <nav class="card" aria-label="Post navigation">
+        <a class="btn" href="/writeups/">← All writeups</a>
+      </nav>
+
+      <footer data-include="/components/footer.html"></footer>
+    </main>
+  </div>
+</body>
+</html>

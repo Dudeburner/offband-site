@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>About & contact · Offband</title>
-  <meta name="description" content="About Offband and how to reach us (with optional PGP encryption)." />
+  <title>Connect · Offband</title>
+  <meta name="description" content="Connect with Offband and reach us securely (with optional PGP encryption)." />
   <link rel="stylesheet" href="/assets/site.css" />
   <script defer src="/assets/include.js"></script>
   <script defer src="/assets/sidebar.js"></script>
@@ -19,7 +19,7 @@
       <section class="card hero">
         <h1 class="brandmark">
           <img class="logo-badge" src="/assets/logo-badge.svg" alt="" aria-hidden="true" />
-          About Offband
+          Connect with Offband
         </h1>
         <p class="lede">
           Offband is a security‑first, community‑driven sandbox: homelab notes,
@@ -29,7 +29,7 @@
 
       <section class="feature-grid grid-2">
         <article class="card">
-          <h3>Contact & keys</h3>
+          <h3>Connect & keys</h3>
           <ul class="list-tight">
             <li>General: <a href="mailto:contact@offband.dev">contact@offband.dev</a></li>
             <li>Security: <a href="mailto:security@offband.dev">security@offband.dev</a></li>
@@ -70,8 +70,38 @@
       <footer data-include="/components/footer.html"></footer>
     </main>
   </div>
-<!-- OpenPGP (CDN). You can swap to a local copy later if you prefer. -->
-<script defer src="https://unpkg.com/openpgp@5.11.1/dist/openpgp.min.js"></script>
+<!-- OpenPGP loader: prefer local, fallback to CDN -->
+<script>
+(function(){
+  // Prefer a locally hosted, pinned version; fall back to CDN if missing
+  var LOCALE_SRC = '/assets/vendor/openpgp-5.11.1.min.js';
+  var CDN_SRC    = 'https://unpkg.com/openpgp@5.11.1/dist/openpgp.min.js';
+  var loaded = false;
+
+  function inject(src, attrs, onload, onerror){
+    var s = document.createElement('script');
+    s.src = src; s.defer = true;
+    if (attrs) for (var k in attrs) s.setAttribute(k, attrs[k]);
+    s.onload = onload; s.onerror = onerror;
+    document.head.appendChild(s);
+  }
+
+  function onReady(){ loaded = true; }
+  function onFail(){ if (!loaded) inject(CDN_SRC, {referrerpolicy:'no-referrer'}, onReady, function(){ /* both failed */ }); }
+
+  // 1) Try local pinned asset first
+  inject(LOCALE_SRC, null, onReady, onFail);
+
+  // 2) Guard: if lib didn’t load in time, disable Encrypt to avoid false sense of security
+  setTimeout(function(){
+    if (!window.openpgp) {
+      var enc = document.getElementById('pgp-encrypt');
+      if (enc) enc.disabled = true;
+      console.warn('[connect] OpenPGP library failed to load; encryption disabled.');
+    }
+  }, 3000);
+})();
+</script>
 <!-- Standardized widget that wires Encrypt/Copy/Download/Email -->
 <script defer src="/assets/pgp-widget.js"></script>
 <!-- Keep security.js for dashboard placeholder logic only -->

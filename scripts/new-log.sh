@@ -4,6 +4,7 @@ set -euo pipefail
 # Usage:
 #   scripts/new-log.sh "Short title" --date YYYY-MM-DD --time HH:MM --body "One-line plain update"
 # Defaults: --date = today (local), --time = current, --body = "Updated"
+# Notes: BODY can also be piped via STDIN if --body is omitted.
 
 TITLE="${1:-}"
 if [[ -z "$TITLE" ]]; then
@@ -26,6 +27,11 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+# If BODY was not explicitly provided, allow piping content via STDIN
+if [[ "$BODY" == "Updated" ]] && [ -p /dev/stdin ]; then
+  BODY="$(cat)"
+fi
+
 # Slug from title: lowercase, spaces->-, strip non-alnum/dash
 SLUG="$(echo "$TITLE" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g; s/^-+|-+$//g')"
 FNAME="${DATE}-${SLUG}.html"
@@ -34,19 +40,29 @@ DST="security/logs/${FNAME}"
 TEMPLATE="security/logs/_template.html"
 [[ -f "$TEMPLATE" ]] || { echo "Template not found at $TEMPLATE" >&2; exit 1; }
 
-# Render from template
+# Ensure destination directory exists
+mkdir -p "$(dirname "$DST")"
+
+# Escape values for safe sed replacement using '|' delimiter
+esc() { printf '%s' "$1" | sed -e 's/[\\\/&|]/\\&/g'; }
+E_DATE="$(esc "$DATE")"
+E_TITLE="$(esc "$TITLE")"
+E_DATETIME="$(esc "${DATE} ${TIME}")"
+E_BODY="$(esc "$BODY")"
+
+# Render from template with safe substitutions
 TMP="$(mktemp)"
 sed \
-  -e "s|{{DATE}}|${DATE}|g" \
-  -e "s|{{TITLE}}|${TITLE}|g" \
-  -e "s|{{DATETIME}}|${DATE} ${TIME}|g" \
-  -e "s|{{BODY}}|${BODY}|g" \
+  -e "s|{{DATE}}|${E_DATE}|g" \
+  -e "s|{{TITLE}}|${E_TITLE}|g" \
+  -e "s|{{DATETIME}}|${E_DATETIME}|g" \
+  -e "s|{{BODY}}|${E_BODY}|g" \
   "$TEMPLATE" > "$TMP"
 
 mv "$TMP" "$DST"
 echo "Created $DST"
 
-# Update index listing: insert at top between markers
+# Update index listing: insert at top between markers (newest first)
 INDEX="security/logs/index.html"
 if [[ -f "$INDEX" ]]; then
   LI="<li><a href=\"/${DST}\">${DATE} — ${TITLE}</a></li>"

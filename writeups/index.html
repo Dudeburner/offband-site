@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Writeups · Offband</title>
   <meta name="description" content="Operator‑grade tutorials, homelab notes, and security experiments — built in public." />
+  <link rel="preload" href="/assets/site.css" as="style">
   <link rel="stylesheet" href="/assets/site.css" />
   <script defer src="/assets/include.js"></script>
   <script defer src="/assets/sidebar.js"></script>
@@ -76,7 +77,8 @@
     </main>
   </div>
 <script>
-(function(){
+(async function(){
+  const POSTS_DIR = '/writeups/posts/';
   const list = document.getElementById('all-writeups');
   const featured = document.getElementById('featured-grid');
   const featuredEmpty = document.getElementById('featured-empty');
@@ -86,35 +88,128 @@
 
   if (!list) return;
 
+  const norm = (p) => (/^https?:\/\//i.test(p) ? new URL(p).pathname : p).replace(/\/+$/, '');
+  const byDateDesc = (a,b) => (b.dateMs||0) - (a.dateMs||0);
+
+  async function fetchHTML(url){
+    const res = await fetch(url, {credentials:'omit'});
+    if(!res.ok) throw new Error('fetch failed ' + url);
+    const html = await res.text();
+    return new DOMParser().parseFromString(html, 'text/html');
+  }
+
+  async function discoverPosts(){
+    // Get directory listing and collect .html files (ignore indexes)
+    let urls = [];
+    try {
+      const doc = await fetchHTML(POSTS_DIR);
+      urls = Array.from(doc.querySelectorAll('a[href]'))
+        .map(a => a.getAttribute('href'))
+        .filter(href => href && /\.html?$/.test(href) && !/\/?index\.html?$/i.test(href))
+        .map(href => new URL(href, POSTS_DIR).pathname)
+        .filter((v,i,arr) => arr.indexOf(v)===i);
+    } catch(e){
+      // If listing fails, fall back to any statically linked items already on the page
+      urls = Array.from(list.querySelectorAll('a[href^="/writeups/posts/"]')).map(a => a.getAttribute('href'));
+    }
+    return urls;
+  }
+
+  function parseDateFromFilename(path){
+    const m = (path||'').match(/(\d{4}-\d{2}-\d{2})/);
+    return m ? m[1] : null;
+  }
+
+  async function hydratePost(url){
+    try{
+      const doc = await fetchHTML(url);
+      const title = (doc.querySelector('h1')?.textContent||'').trim() || url.split('/').pop().replace(/[-_]/g,' ').replace(/\.html?$/,'');
+      const timeEl = doc.querySelector('time[datetime]');
+      const iso = timeEl?.getAttribute('datetime') || parseDateFromFilename(url) || '';
+      const dateMs = iso ? Date.parse(iso) : 0;
+      const chips = Array.from(doc.querySelectorAll('.badge-chip')).map(x => (x.textContent||'').trim().toLowerCase());
+      // Pick a primary category from tags if present
+      const catOrder = ['security','networking','tooling','meta'];
+      const cat = chips.find(t => catOrder.includes(t)) || (chips[0]||'meta');
+      return { url, title, iso, dateMs, tags: chips, cat };
+    } catch(e){
+      const iso = parseDateFromFilename(url) || '';
+      return { url, title: url.split('/').pop(), iso, dateMs: iso?Date.parse(iso):0, tags: [], cat: 'meta' };
+    }
+  }
+
+  function renderFeatured(posts){
+    featured.innerHTML = '';
+    const pick = posts.slice(0,3);
+    pick.forEach(p => {
+      const card = document.createElement('article');
+      card.className = 'card';
+      // a subtle unique header SVG for flair
+      const deco = document.createElementNS('http://www.w3.org/2000/svg','svg');
+      deco.setAttribute('viewBox','0 0 120 24');
+      deco.setAttribute('width','100%');
+      deco.setAttribute('height','24');
+      const line = document.createElementNS('http://www.w3.org/2000/svg','path');
+      line.setAttribute('d','M2 12 Q 20 2 40 12 T 78 12 T 118 12');
+      line.setAttribute('fill','none');
+      line.setAttribute('stroke','currentColor');
+      line.setAttribute('stroke-opacity','0.25');
+      line.setAttribute('stroke-width','2');
+      deco.appendChild(line);
+
+      const h = document.createElement('h3'); h.textContent = p.title;
+      const meta = document.createElement('p'); meta.className='small muted'; meta.textContent = p.iso || '';
+      const tagrow = document.createElement('p');
+      (p.tags||[]).slice(0,4).forEach(t=>{
+        const span = document.createElement('span');
+        span.className = 'badge-chip';
+        span.textContent = t;
+        tagrow.appendChild(span);
+        tagrow.appendChild(document.createTextNode(' '));
+      });
+      const link = document.createElement('a');
+      link.className = 'btn';
+      link.href = p.url; link.textContent = 'Read';
+
+      card.append(deco,h,meta,tagrow,link);
+      featured.appendChild(card);
+    });
+    featuredEmpty.hidden = pick.length > 0;
+  }
+
+  function renderAll(posts){
+    list.innerHTML = '';
+    posts.forEach(p => {
+      const li = document.createElement('li');
+      if (p.tags?.length) li.setAttribute('data-tags', p.tags.join(','));
+      const a = document.createElement('a'); a.href = p.url; a.textContent = p.title;
+      li.appendChild(a); list.appendChild(li);
+    });
+  }
+
+  // DISCOVER + HYDRATE
+  let posts = [];
+  try{
+    const urls = await discoverPosts();
+    const hydrated = await Promise.all(urls.map(hydratePost));
+    posts = hydrated.sort(byDateDesc);
+  }catch(e){ /* leave posts empty */ }
+
+  // FALLBACK: if still empty, keep whatever was in the static list
+  if (!posts.length){
+    const fallback = Array.from(list.querySelectorAll('a')).map(a=>({url:a.href,title:a.textContent||a.href, iso:'', dateMs:0, tags:[], cat:'meta'}));
+    posts = fallback;
+  } else {
+    renderAll(posts);
+  }
+
+  // FEATURED (top 3 or fewer)
+  try{ renderFeatured(posts); } catch(_){}
+
+  // FILTERING (search + categories)
   function items(){ return Array.from(list.querySelectorAll('li')); }
   function textOf(el){ return (el.textContent||'').toLowerCase(); }
 
-  // FEATURED: take the most recent up to 3 (top of list), tolerate <3
-  try {
-    const links = items().slice(0,3).map(li => li.querySelector('a')).filter(Boolean);
-    if (links.length){
-      links.forEach(a => {
-        const card = document.createElement('article');
-        card.className = 'card';
-        const h = document.createElement('h3');
-        h.textContent = a.textContent.trim();
-        const p = document.createElement('p');
-        p.className = 'muted';
-        p.textContent = a.href;
-        const link = document.createElement('a');
-        link.className = 'btn';
-        link.href = a.getAttribute('href');
-        link.textContent = 'Read';
-        card.append(h,p,link);
-        featured && featured.appendChild(card);
-      });
-      if (featuredEmpty) featuredEmpty.hidden = true;
-    } else {
-      if (featuredEmpty) featuredEmpty.hidden = false;
-    }
-  } catch(e) { if (featuredEmpty) featuredEmpty.hidden = false; }
-
-  // FILTERING (search + categories)
   let activeCat = 'all';
   function applyFilter(){
     const q = (search && search.value || '').toLowerCase();
