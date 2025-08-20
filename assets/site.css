@@ -82,7 +82,7 @@ button:hover { outline: 1px solid var(--accent-weak); }
 /* -------------------- LAYOUT -------------------- */
 /* Global topbar always sits above content */
 .topbar {
-  position: sticky; top: 0; z-index: 50;
+  position: sticky; top: 0; z-index: 1000;
   background: linear-gradient(180deg, rgba(10,14,20,.9), rgba(10,14,20,.6));
   backdrop-filter: blur(8px);
   border-bottom: var(--line);
@@ -119,9 +119,19 @@ button:hover { outline: 1px solid var(--accent-weak); }
 /* Sidebar container (visual polish can be tweaked later) */
 .sidebar { background: var(--panel); border: var(--line); border-radius: var(--radius); padding: var(--pad-3); }
 
-/* Collapsed sidebar hook: JS may toggle this class */
-body.sidebar-collapsed .layout { grid-template-columns: 0 1fr; }
-body.sidebar-collapsed .sidebar { display: none; }
+/* Collapsed sidebar: keep a thin rail so the toggle remains accessible */
+:root { --sidebar-rail-w: 56px; }
+body.sidebar-collapsed .layout { grid-template-columns: var(--sidebar-rail-w) 1fr; }
+body.sidebar-collapsed .sidebar {
+  width: var(--sidebar-rail-w);
+  padding: var(--pad-2);
+  overflow: hidden;
+}
+/* Hide tree/nav content, but keep the main toggle (#sidebar-toggle) accessible */
+body.sidebar-collapsed .sidebar nav,
+body.sidebar-collapsed .sidebar .tree { display: none; }
+body.sidebar-collapsed .sidebar .toolbar > *:not(#sidebar-toggle) { display: none; }
+#sidebar-toggle { display: inline-flex; align-items: center; justify-content: center; }
 
 /* -------------------- SIDEBAR NAV -------------------- */
 nav.sidebar .tree { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .25rem; }

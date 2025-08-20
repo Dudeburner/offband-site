@@ -1,61 +1,91 @@
-(function(){
-  function setExpanded(el, val){
-    el.setAttribute('aria-expanded', String(val));
-    const icon = el.querySelector('.twisty');
-    if(icon) icon.textContent = val ? '▾' : '▸';
-  }
+// assets/sidebar.js
+// Sidebar behavior (collapse sidebar) + separate tree controls.
+// Minimal, theme-agnostic, idempotent. No layout/CSS changes here.
 
-  function initTree(root){
-    root.querySelectorAll('.folder').forEach(folder=>{
-      const btn = folder.querySelector('.twisty');
-      const startOpen = folder.dataset.open === 'true';
-      setExpanded(folder, !!startOpen);
-      btn?.addEventListener('click', (e)=>{
-        e.preventDefault();
-        const open = folder.getAttribute('aria-expanded') === 'true';
-        setExpanded(folder, !open);
-      });
-      // keyboard support when row is focused
-      const row = folder.querySelector('.row');
-      row?.addEventListener('keydown', (e)=>{
-        if(e.key === 'ArrowRight'){ setExpanded(folder, true); }
-        if(e.key === 'ArrowLeft'){ setExpanded(folder, false); }
-      });
+const SIDEBAR_STATE_KEY = "offband.sidebarCollapsed";
+const BODY_COLLAPSE_CLASS = "sidebar-collapsed";
+
+// --- Core state ---
+function setSidebarCollapsed(collapsed) {
+  const body = document.body;
+  if (!body) return;
+
+  if (collapsed) {
+    body.classList.add(BODY_COLLAPSE_CLASS);
+  } else {
+    body.classList.remove(BODY_COLLAPSE_CLASS);
+  }
+  // Persist
+  try { localStorage.setItem(SIDEBAR_STATE_KEY, String(collapsed)); } catch {}
+
+  // Reflect state on the main sidebar toggle button if present
+  const btn = document.getElementById("sidebar-toggle");
+  if (btn) {
+    btn.setAttribute("aria-expanded", String(!collapsed));
+    // Avoid styling churn; only update accessible label/title
+    const collapsedLabel = "Expand sidebar";
+    const expandedLabel = "Collapse sidebar";
+    const label = collapsed ? collapsedLabel : expandedLabel;
+    btn.setAttribute("aria-label", label);
+    btn.title = label;
+    // If your UI expects the button text to change, uncomment:
+    // if (!btn.dataset.lockText) btn.textContent = label;
+  }
+}
+
+function getInitialCollapsed() {
+  try {
+    return localStorage.getItem(SIDEBAR_STATE_KEY) === "true";
+  } catch {
+    return false;
+  }
+}
+
+// --- Tree controls (operate ONLY on the nav tree) ---
+function collapseTree() {
+  document.querySelectorAll('#sidebar nav details[open]').forEach(d => { d.open = false; });
+}
+function expandTree() {
+  document.querySelectorAll('#sidebar nav details').forEach(d => { d.open = true; });
+}
+
+// --- Wiring (idempotent) ---
+function initSidebarOnce() {
+  // Guard so re-imports don’t double-bind
+  if (document.documentElement.dataset.sidebarInit === "1") return;
+  document.documentElement.dataset.sidebarInit = "1";
+
+  // Restore persisted state
+  setSidebarCollapsed(getInitialCollapsed());
+
+  // Sidebar toggle (collapses the whole sidebar)
+  const toggle = document.getElementById("sidebar-toggle");
+  if (toggle && !toggle.dataset.bound) {
+    toggle.dataset.bound = "1";
+    toggle.addEventListener("click", (e) => {
+      e.preventDefault();
+      const isCollapsed = document.body.classList.contains(BODY_COLLAPSE_CLASS);
+      setSidebarCollapsed(!isCollapsed);
     });
   }
 
-  // NEW: highlight current path and expand containing folders
-  function highlightActive(root){
-    // normalize paths: treat / and /index.html the same; drop trailing slash (except root)
-    let p = location.pathname;
-    if (p.endsWith('/index.html')) p = p.slice(0, -'index.html'.length);
-    if (p.length > 1 && p.endsWith('/')) p = p.slice(0, -1);
+  // Tree controls (do NOT touch sidebar width)
+  const btnCollapseAll = document.getElementById("tree-collapse-all");
+  const btnExpandAll = document.getElementById("tree-expand-all");
 
-    // find best match (exact first, then with/without trailing slash)
-    const links = Array.from(root.querySelectorAll('a[href]'));
-    let best = links.find(a => new URL(a.getAttribute('href'), location.origin).pathname === p);
-    if (!best && !p.endsWith('/')) {
-      best = links.find(a => new URL(a.getAttribute('href'), location.origin).pathname === (p + '/'));
-    }
-    if (!best && p.endsWith('/')) {
-      best = links.find(a => new URL(a.getAttribute('href'), location.origin).pathname === p.slice(0,-1));
-    }
-
-    if (best) {
-      best.classList.add('active');
-      const row = best.closest('.row');
-      row?.classList.add('active');
-
-      // expand any parent folders so the active item is visible
-      let f = best.closest('.folder');
-      while (f) {
-        setExpanded(f, true);
-        f = f.parentElement?.closest('.folder') || null;
-      }
-    }
+  if (btnCollapseAll && !btnCollapseAll.dataset.bound) {
+    btnCollapseAll.dataset.bound = "1";
+    btnCollapseAll.addEventListener("click", (e) => { e.preventDefault(); collapseTree(); });
   }
+  if (btnExpandAll && !btnExpandAll.dataset.bound) {
+    btnExpandAll.dataset.bound = "1";
+    btnExpandAll.addEventListener("click", (e) => { e.preventDefault(); expandTree(); });
+  }
+}
 
-  // expose
-  window.__initSidebarTree = initTree;
-  window.__highlightActive = highlightActive;
-})();
+// Initialize when DOM is ready (safe if this file loads in <head> or end of <body>)
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initSidebarOnce, { once: true });
+} else {
+  initSidebarOnce();
+}

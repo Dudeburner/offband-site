@@ -2,20 +2,50 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <!-- Root -->
-  <url><loc>https://offband.dev/</loc></url>
+  <url>
+    <loc>https://offband.dev/</loc>
+    <lastmod>2025-08-19</lastmod>
+  </url>
 
   <!-- Writeups -->
-  <url><loc>https://offband.dev/writeups/</loc></url>
-  <url><loc>https://offband.dev/writeups/posts/2025-08-16-configuring-my-first-web-page.html</loc></url>
+  <url>
+    <loc>https://offband.dev/writeups/</loc>
+    <lastmod>2025-08-19</lastmod>
+  </url>
+  <url>
+    <loc>https://offband.dev/writeups/posts/2025-08-16-configuring-my-first-web-page.html</loc>
+    <lastmod>2025-08-16</lastmod>
+  </url>
 
   <!-- Security -->
-  <url><loc>https://offband.dev/security/</loc></url>
-  <url><loc>https://offband.dev/security/logs/</loc></url>
-  <url><loc>https://offband.dev/security/logs/2025-08-17-dns-configuration.html</loc></url>
-  <url><loc>https://offband.dev/security/logs/2025-08-17-hardening-web-server.html</loc></url>
-  <url><loc>https://offband.dev/security/logs/2025-08-18-ssh-hardening.html</loc></url>
-  <url><loc>https://offband.dev/security/logs/2025-08-18-tools-keys-audit.html</loc></url>
+  <url>
+    <loc>https://offband.dev/security/</loc>
+    <lastmod>2025-08-19</lastmod>
+  </url>
+  <url>
+    <loc>https://offband.dev/security/logs/</loc>
+    <lastmod>2025-08-19</lastmod>
+  </url>
+  <url>
+    <loc>https://offband.dev/security/logs/2025-08-17-dns-configuration.html</loc>
+    <lastmod>2025-08-17</lastmod>
+  </url>
+  <url>
+    <loc>https://offband.dev/security/logs/2025-08-17-hardening-web-server.html</loc>
+    <lastmod>2025-08-17</lastmod>
+  </url>
+  <url>
+    <loc>https://offband.dev/security/logs/2025-08-18-ssh-hardening.html</loc>
+    <lastmod>2025-08-18</lastmod>
+  </url>
+  <url>
+    <loc>https://offband.dev/security/logs/2025-08-18-tools-keys-audit.html</loc>
+    <lastmod>2025-08-18</lastmod>
+  </url>
 
   <!-- Connect -->
-  <url><loc>https://offband.dev/connect/</loc></url>
+  <url>
+    <loc>https://offband.dev/connect/</loc>
+    <lastmod>2025-08-19</lastmod>
+  </url>
 </urlset>
