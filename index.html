@@ -24,8 +24,8 @@
       <section class="hero hero--center">
         <div class="hero__brandmark">
           <h1 class="brandmark">
-            <img class="logo-badge" src="/assets/logo-badge.svg" alt="" aria-hidden="true" />
-            Offband
+            <img class="brand-logo" src="/assets/logo-badge.svg" alt="" width="96" height="96" aria-hidden="true" />
+            <span class="brand-name">Offband</span>
           </h1>
         </div>
 
@@ -42,6 +42,63 @@
           <a class="btn" href="/security/">See dashboard</a>
         </div>
       </section>
+
+      <!-- Featured: latest writeup + latest log -->
+      <section id="featured" class="card featured" aria-label="Recent activity">
+        <h2 class="h3">Latest from the lab</h2>
+        <ul id="featured-list" class="featured-list">
+          <li class="muted">Loading recent activity…</li>
+        </ul>
+      </section>
+
+      <script>
+      (async function () {
+        const list = document.getElementById('featured-list');
+        if (!list) return;
+
+        async function latestItem(indexUrl, requiredPrefix, fallbackLabel) {
+          try {
+            const res = await fetch(indexUrl, { headers: { 'Accept': 'text/html' } });
+            if (!res.ok) throw new Error('fetch failed');
+            const html = await res.text();
+            const doc = new DOMParser().parseFromString(html, 'text/html');
+            // Try common list wrappers first, then fall back to any anchors
+            const candidates = Array.from(doc.querySelectorAll(
+              'main a, .list a, .posts a, .post-list a, .logs a, .logs-list a, a'
+            ));
+            const internal = candidates.filter(a => {
+              const href = a.getAttribute('href') || '';
+              return href.startsWith(requiredPrefix);
+            });
+            const first = internal[0];
+            if (first) {
+              const href = first.getAttribute('href');
+              const title = (first.textContent || '').trim() || fallbackLabel;
+              return { href, title, label: fallbackLabel };
+            }
+          } catch (_) {}
+          return null;
+        }
+
+        const [post, log] = await Promise.all([
+          latestItem('/writeups/posts/index.html', '/writeups/posts/', 'Writeup'),
+          latestItem('/security/logs/index.html', '/security/logs/', 'Security log')
+        ]);
+
+        list.innerHTML = '';
+        const items = [post, log].filter(Boolean);
+        if (items.length === 0) {
+          list.innerHTML = '<li class="muted">No recent items yet.</li>';
+          return;
+        }
+
+        for (const it of items) {
+          const li = document.createElement('li');
+          li.innerHTML = `<a class="link" href="${it.href}">${it.title}</a> <span class="tag">${it.label}</span>`;
+          list.appendChild(li);
+        }
+      })();
+      </script>
 
       <!-- Community / Get involved -->
       <section class="card callout">
