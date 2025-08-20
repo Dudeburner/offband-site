@@ -1,91 +1,196 @@
 // assets/sidebar.js
-// Sidebar behavior (collapse sidebar) + separate tree controls.
-// Minimal, theme-agnostic, idempotent. No layout/CSS changes here.
+// Sidebar behavior + tree initialization for dynamically injected markup.
+// Single source of truth for sidebar logic. Idempotent. Theme-agnostic.
 
-const SIDEBAR_STATE_KEY = "offband.sidebarCollapsed";
-const BODY_COLLAPSE_CLASS = "sidebar-collapsed";
+(function(){
+  const COLLAPSE_KEY = 'offband.sidebarCollapsed';
+  const TREE_STATE_KEY = 'sidebar.v1'; // matches prior storage
+  const BODY_COLLAPSE_CLASS = 'sidebar-collapsed';
 
-// --- Core state ---
-function setSidebarCollapsed(collapsed) {
-  const body = document.body;
-  if (!body) return;
+  // ---------------- Core collapse state ----------------
+  function setSidebarCollapsed(collapsed) {
+    const body = document.body;
+    if (!body) return;
+    body.classList.toggle(BODY_COLLAPSE_CLASS, !!collapsed);
+    try { localStorage.setItem(COLLAPSE_KEY, String(!!collapsed)); } catch {}
+  }
+  function getInitialCollapsed() {
+    try { return localStorage.getItem(COLLAPSE_KEY) === 'true'; } catch { return false; }
+  }
 
-  if (collapsed) {
-    body.classList.add(BODY_COLLAPSE_CLASS);
+  // Apply saved collapse state early
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function(){ setSidebarCollapsed(getInitialCollapsed()); }, { once: true });
   } else {
-    body.classList.remove(BODY_COLLAPSE_CLASS);
+    setSidebarCollapsed(getInitialCollapsed());
   }
-  // Persist
-  try { localStorage.setItem(SIDEBAR_STATE_KEY, String(collapsed)); } catch {}
 
-  // Reflect state on the main sidebar toggle button if present
-  const btn = document.getElementById("sidebar-toggle");
-  if (btn) {
-    btn.setAttribute("aria-expanded", String(!collapsed));
-    // Avoid styling churn; only update accessible label/title
-    const collapsedLabel = "Expand sidebar";
-    const expandedLabel = "Collapse sidebar";
-    const label = collapsed ? collapsedLabel : expandedLabel;
-    btn.setAttribute("aria-label", label);
-    btn.title = label;
-    // If your UI expects the button text to change, uncomment:
-    // if (!btn.dataset.lockText) btn.textContent = label;
+  // ---------------- Tree helpers (scoped to a root) ----------------
+  function persistTreeState(nav) {
+    const state = {};
+    nav.querySelectorAll('.folder').forEach((li, idx) => {
+      state[idx] = li.getAttribute('aria-expanded') === 'true';
+    });
+    try { localStorage.setItem(TREE_STATE_KEY, JSON.stringify(state)); } catch {}
   }
-}
-
-function getInitialCollapsed() {
-  try {
-    return localStorage.getItem(SIDEBAR_STATE_KEY) === "true";
-  } catch {
-    return false;
+  function restoreTreeState(nav) {
+    let saved = null;
+    try { saved = JSON.parse(localStorage.getItem(TREE_STATE_KEY) || '{}'); } catch {}
+    nav.querySelectorAll('.folder').forEach((li, idx) => {
+      const open = (saved && saved[idx] !== undefined) ? !!saved[idx] : li.hasAttribute('data-open');
+      setOpen(li, open);
+    });
   }
-}
+  function setOpen(li, open) {
+    li.setAttribute('aria-expanded', open ? 'true' : 'false');
+    li.dataset.open = open ? 'true' : 'false';
+    const twisty = li.querySelector('.twisty');
+    if (twisty) twisty.textContent = open ? '▾' : '▸';
+  }
+  function toggleFolder(li, nav) {
+    const next = li.getAttribute('aria-expanded') !== 'true';
+    setOpen(li, next);
+    persistTreeState(nav);
+  }
+  function collapseAll(nav) {
+    nav.querySelectorAll('.folder').forEach((li) => setOpen(li, false));
+    persistTreeState(nav);
+  }
+  function expandAll(nav) {
+    nav.querySelectorAll('.folder').forEach((li) => setOpen(li, true));
+    persistTreeState(nav);
+  }
 
-// --- Tree controls (operate ONLY on the nav tree) ---
-function collapseTree() {
-  document.querySelectorAll('#sidebar nav details[open]').forEach(d => { d.open = false; });
-}
-function expandTree() {
-  document.querySelectorAll('#sidebar nav details').forEach(d => { d.open = true; });
-}
+  function anyOpen(nav) {
+    return !!nav.querySelector('.folder[aria-expanded="true"]');
+  }
 
-// --- Wiring (idempotent) ---
-function initSidebarOnce() {
-  // Guard so re-imports don’t double-bind
-  if (document.documentElement.dataset.sidebarInit === "1") return;
-  document.documentElement.dataset.sidebarInit = "1";
-
-  // Restore persisted state
-  setSidebarCollapsed(getInitialCollapsed());
-
-  // Sidebar toggle (collapses the whole sidebar)
-  const toggle = document.getElementById("sidebar-toggle");
-  if (toggle && !toggle.dataset.bound) {
-    toggle.dataset.bound = "1";
-    toggle.addEventListener("click", (e) => {
-      e.preventDefault();
-      const isCollapsed = document.body.classList.contains(BODY_COLLAPSE_CLASS);
-      setSidebarCollapsed(!isCollapsed);
+  // ---------------- Active link highlight ----------------
+  function normPath(p){
+    const u = (p || '/').split('#')[0].split('?')[0];
+    return u.replace(/\/+$/, '/') || '/';
+  }
+  function highlightActive(root){
+    const nav = root ? root.querySelector('nav.sidebar') : document.querySelector('nav.sidebar');
+    if (!nav) return;
+    const here = normPath(location.pathname);
+    nav.querySelectorAll('a[href]').forEach((a) => {
+      const href = normPath(a.getAttribute('href'));
+      if (here === href || (href !== '/' && here.startsWith(href))) {
+        a.classList.add('active');
+        const parent = a.closest('.folder');
+        if (parent) setOpen(parent, true);
+      }
     });
   }
 
-  // Tree controls (do NOT touch sidebar width)
-  const btnCollapseAll = document.getElementById("tree-collapse-all");
-  const btnExpandAll = document.getElementById("tree-expand-all");
-
-  if (btnCollapseAll && !btnCollapseAll.dataset.bound) {
-    btnCollapseAll.dataset.bound = "1";
-    btnCollapseAll.addEventListener("click", (e) => { e.preventDefault(); collapseTree(); });
+  // ---------------- Auto-populate helpers ----------------
+  async function getLinks(url, filterFn, max=5) {
+    const res = await fetch(url, { credentials: 'omit' });
+    if (!res.ok) throw new Error('fetch failed: ' + url);
+    const html = await res.text();
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    const links = Array.from(doc.querySelectorAll('a[href]'))
+      .map(a => ({ href: a.getAttribute('href'), text: (a.textContent||'').trim() }))
+      .filter(({href, text}) => href && filterFn(href, text));
+    const norm = (h) => (/^https?:\/\//i.test(h)) ? h : new URL(h, url).pathname;
+    return links.slice(0, max).map(({href, text}) => ({ href: norm(href), text }));
   }
-  if (btnExpandAll && !btnExpandAll.dataset.bound) {
-    btnExpandAll.dataset.bound = "1";
-    btnExpandAll.addEventListener("click", (e) => { e.preventDefault(); expandTree(); });
+  function insertItems(placeholder, items) {
+    if (!placeholder || !items || !items.length) return;
+    const frag = document.createDocumentFragment();
+    items.forEach(({href, text}) => {
+      const li = document.createElement('li');
+      const row = document.createElement('div');
+      row.className = 'row';
+      const a = document.createElement('a');
+      a.href = href; a.textContent = text || href;
+      row.appendChild(a); li.appendChild(row); frag.appendChild(li);
+    });
+    placeholder.replaceWith(frag);
   }
-}
 
-// Initialize when DOM is ready (safe if this file loads in <head> or end of <body>)
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", initSidebarOnce, { once: true });
-} else {
-  initSidebarOnce();
-}
+  async function autoPopulate(nav){
+    try {
+      try {
+        const writeups = await getLinks('/writeups/', (href) => /\/writeups\//.test(href) && !/\/\?index\.html?$/.test(href), 5);
+        insertItems(nav.querySelector('.auto-writeups'), writeups);
+      } catch(_){}
+      try {
+        const logs = await getLinks('/security/logs/', (href) => /\/security\/logs\//.test(href) && !/\/\?index\.html?$/.test(href), 5);
+        insertItems(nav.querySelector('.auto-logs'), logs);
+      } catch(_){}
+    } catch(_){}
+  }
+
+  // ---------------- Public initializer (called after HTML inject) ----------------
+  function initSidebarTree(root){
+    const mount = root || document;
+    const nav = mount.querySelector('nav.sidebar');
+    if (!nav || nav.dataset.bound === '1') return; // idempotent
+    nav.dataset.bound = '1';
+
+    // Restore tree state
+    restoreTreeState(nav);
+
+    // Toolbar caret toggle
+    const caret = nav.querySelector('#tree-toggle');
+    const updateCaret = () => {
+      if (!caret) return;
+      const open = anyOpen(nav);
+      caret.textContent = open ? '▾' : '▸';
+      caret.setAttribute('aria-pressed', String(open));
+    };
+    if (caret && !caret.dataset.bound) {
+      caret.dataset.bound = '1';
+      caret.addEventListener('click', (e) => {
+        e.preventDefault();
+        anyOpen(nav) ? collapseAll(nav) : expandAll(nav);
+        updateCaret();
+      });
+      updateCaret();
+    }
+
+    // Sidebar collapse toggle (− button in toolbar)
+    const sbToggle = nav.querySelector('#sidebar-toggle');
+    if (sbToggle && !sbToggle.dataset.bound) {
+      sbToggle.dataset.bound = '1';
+      sbToggle.addEventListener('click', (e) => {
+        e.preventDefault();
+        const isCollapsed = document.body.classList.contains(BODY_COLLAPSE_CLASS);
+        setSidebarCollapsed(!isCollapsed);
+        // Reflect ARIA state
+        sbToggle.setAttribute('aria-expanded', String(isCollapsed));
+      });
+      // Reflect persisted state on load
+      sbToggle.setAttribute('aria-expanded', String(!document.body.classList.contains(BODY_COLLAPSE_CLASS)));
+    }
+
+    // Folder rows: click + keyboard
+    nav.querySelectorAll('.folder > .row').forEach((row) => {
+      const li = row.parentElement;
+      if (row.dataset.bound === '1') return;
+      row.dataset.bound = '1';
+      row.addEventListener('click', (e) => {
+        if (e.target && e.target.tagName === 'A') return; // let links pass
+        toggleFolder(li, nav);
+      });
+      row.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleFolder(li, nav); }
+        if (e.key === 'ArrowRight') { setOpen(li, true); persistTreeState(nav); }
+        if (e.key === 'ArrowLeft')  { setOpen(li, false); persistTreeState(nav); }
+      });
+    });
+
+    // Active highlight
+    highlightActive(mount);
+
+    // Auto-populate
+    autoPopulate(nav);
+  }
+
+  // Expose globals used by sidebar-init.js
+  window.__initSidebarTree = initSidebarTree;
+  window.__highlightActive = highlightActive;
+
+})();
