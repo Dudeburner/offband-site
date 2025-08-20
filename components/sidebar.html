@@ -1,7 +1,13 @@
 <nav class="sidebar" aria-label="Site navigation">
   <div class="toolbar" aria-label="Sidebar controls">
-    <button type="button" class="collapse-all" aria-expanded="true" aria-controls="sidebar-tree">Collapse all</button>
-    <button type="button" class="expand-all" aria-controls="sidebar-tree">Expand all</button>
+    <button id="sidebar-toggle" type="button" class="btn sm" aria-expanded="true" aria-label="Collapse sidebar" title="Collapse sidebar">−</button>
+    <button id="tree-toggle"
+            type="button"
+            class="btn sm ghost"
+            aria-controls="sidebar-tree"
+            aria-pressed="false"
+            title="Toggle tree"
+            aria-label="Toggle tree">▾</button>
   </div>
 
   <ul id="sidebar-tree" class="tree">
@@ -54,7 +60,6 @@
   <script>
   (function () {
     const STORAGE_KEY = 'sidebar.v1';
-    const BODY_COLLAPSE_CLASS = 'sidebar-collapsed';
     const nav = document.currentScript.closest('nav.sidebar') || document.currentScript.parentElement;
     if (!nav) return;
 
@@ -90,24 +95,40 @@
 
     function collapseAll() {
       nav.querySelectorAll('.folder').forEach((li) => setOpen(li, false));
-      try { document.body.classList.add(BODY_COLLAPSE_CLASS); } catch (_) {}
       persist();
     }
 
     function expandAll() {
       nav.querySelectorAll('.folder').forEach((li) => setOpen(li, true));
-      try { document.body.classList.remove(BODY_COLLAPSE_CLASS); } catch (_) {}
       persist();
     }
 
-    // Toolbar controls (collapse/expand all)
+    // Toolbar control: single caret toggle for tree (does not affect sidebar width)
     (function(){
       const toolbar = nav.querySelector('.toolbar');
       if (!toolbar) return;
-      const btnCollapse = toolbar.querySelector('.collapse-all');
-      const btnExpand = toolbar.querySelector('.expand-all');
-      if (btnCollapse) btnCollapse.addEventListener('click', collapseAll);
-      if (btnExpand) btnExpand.addEventListener('click', expandAll);
+      const btnToggle = toolbar.querySelector('#tree-toggle');
+      if (!btnToggle) return;
+
+      const anyOpen = () => !!nav.querySelector('.folder[aria-expanded="true"]');
+      const updateIcon = () => {
+        const open = anyOpen();
+        btnToggle.textContent = open ? '▾' : '▸';
+        btnToggle.setAttribute('aria-pressed', String(open));
+      };
+
+      btnToggle.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (anyOpen()) {
+          collapseAll();
+        } else {
+          expandAll();
+        }
+        updateIcon();
+      });
+
+      // Initialize caret based on restored state
+      updateIcon();
     })();
 
     // Make the whole row clickable
