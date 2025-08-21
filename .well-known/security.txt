@@ -3,4 +3,6 @@ Contact: mailto:connect@offband.dev
 Encryption: https://offband.dev/keys/offband.asc
 Acknowledgments: https://offband.dev/security/acknowledgments.html
 Preferred-Languages: en
+Policy: https://offband.dev/security/
 Canonical: https://offband.dev/.well-known/security.txt
+Expires: 2025-12-31T23:59:00Z

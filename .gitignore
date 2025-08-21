@@ -16,10 +16,25 @@ templates
 *.ovpn
 *.env
 .env.*
+!*.env.example
 secrets/
 **/secrets/
 
-# Keys directory: allow ONLY the public key
+# Keys directory: allow ONLY the public key and README
 keys/*
 !keys/offband.asc
 !keys/README.md
+
+# Ignore everything in .well-known except security.txt
+.well-known/*
+!.well-known/security.txt
+
+# Ignore common editor/OS/temp files
+.vscode/
+.idea/
+*.swp
+*~
+Thumbs.db
+
+# Decrypted messages (never commit)
+private/decrypted/
