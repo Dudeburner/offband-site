@@ -1,10 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Automating Web Server Deployment with GitHub (Security First)</title>
-</head>
-<body>
+<article class="card prose" id="post">
   <h1>Automating Web Server Deployment with GitHub (Security First)</h1>
 
   <p>Most deployment guides on the internet treat GitHub like a conveyor belt: push your code, watch the magic happen, move on. We’re going to take a different approach. Offband exists as a transparent lab — a place where <em>everything</em> is visible, not just the finished product. That means we can’t afford to think of GitHub as a black box. Every decision — what goes in the repo, what stays out, how the server pulls updates — carries a security implication.</p>
@@ -162,6 +156,7 @@ sudo systemctl disable offband-update.timer</code></pre>
 
   <p>This model only works if you are strict about <code>.gitignore</code> and disciplined about what you publish. For Offband, that discipline is part of the experiment.</p>
 
+  <p>At Offband, we deliberately run “hot.” Our entire lab is exposed because it makes us sharper. We know people will poke at our defenses. That’s by design. But this isn’t the right model for every project.</p>
   <h2>Alternative Deployment Models</h2>
   <p>Not everyone wants to run a public lab. Maybe your project is client-facing, maybe you’re not ready to expose every script, or maybe compliance forbids it. In that case, you still want automation — but you’ll want to tighten the pipeline.</p>
 
@@ -185,8 +180,6 @@ sudo systemctl disable offband-update.timer</code></pre>
 
   <p>In the public repo model, the stakes are higher because anyone can see your commits. This transparency is a double-edged sword — it invites scrutiny but also exposes your attack surface. Always ask yourself: <em>what belongs in public, what belongs in private, and why?</em></p>
 
-  <p>At Offband, we deliberately run “hot.” Our entire lab is exposed because it makes us sharper. We know people will poke at our defenses. That’s by design. But this isn’t the right model for every project.</p>
-
   <h2>Further Automation with Bash Script</h2>
   <p>Once you’re comfortable with this setup, you might want to wrap the deployment process in a helper bash script to handle logging, error checking, or custom hooks. This can make your automation more robust and easier to maintain.</p>
   <p>Check out our <a href="/security/tools/">security/tools/</a> directory for example scripts and utilities designed to complement this workflow.</p>
@@ -197,5 +190,4 @@ sudo systemctl disable offband-update.timer</code></pre>
   <p>We chose transparency because Offband is a lab, a testbed, a target meant to be attacked and defended in full view. You might choose differently — and that’s okay. What matters is that you choose intentionally, not by accident.</p>
 
   <p>Think of it this way: code can be automated, but security can’t be outsourced. Every push is a decision. Make it count.</p>
-</body>
-</html>
+</article>
