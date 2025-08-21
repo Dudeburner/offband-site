@@ -11,6 +11,7 @@ M           ?= site update          # commit message when not provided: make pus
 SSH_USER    ?= deploy
 SSH_HOST    ?= 45.79.217.101
 SSH         := ssh -o StrictHostKeyChecking=accept-new $(SSH_USER)@$(SSH_HOST)
+SSH_TTY     ?= ssh -t $(SSH_USER)@$(SSH_HOST)
 WEBROOT     ?= /srv/site
 
 # default help
@@ -36,7 +37,7 @@ push: preflight
 	git push $(REMOTE) $(BRANCH); \
 	echo "✓ pushed to GitHub (deployment will follow)"
 
-## deploy: clean, idempotent server sync (git fetch/reset/clean + nginx reload)
+## deploy: manual server sync (force git fetch/reset/clean + nginx reload) — bypasses queue
 deploy: preflight
 	$(call CONFIRM,This will sync the server to origin/$(BRANCH) and reload nginx)
 	@$(SSH) 'set -euo pipefail; \
@@ -49,14 +50,19 @@ deploy: preflight
 	  echo "✓ server synced to origin/$(BRANCH)"'
 
 .PHONY: deploy-now
-## deploy-now: trigger server pull via systemd and show recent logs
+## deploy-now: push directly via systemd pull (immediate), then show recent logs
 deploy-now: preflight
 	$(call CONFIRM,This will start site-update.service on the server)
-	@$(SSH) 'set -euo pipefail; \
+	@$(SSH_TTY) 'set -euo pipefail; \
 	  sudo systemctl start site-update.service; \
 	  echo "→ last 50 lines"; \
-	  journalctl -u site-update.service -n 50 -o cat --since "-5 min" || true; \
+	  sudo journalctl -u site-update.service -n 50 -o cat --since "-5 min" || true; \
 	  echo "✓ deploy requested"'
+
+.PHONY: tail
+## tail: follow logs for site-update.service
+tail:
+	@$(SSH_TTY) 'sudo journalctl -f -u site-update.service -o cat'
 
 ## push-deploy: push then deploy (with both confirmations)
 push-deploy: push deploy
@@ -133,21 +139,26 @@ key-export:
 help:
 	@# detect color support
 	@if command -v tput >/dev/null 2>&1 && [ -t 1 ]; then \
-	  BOLD="$$(tput bold)"; DIM="$$(tput dim)"; RESET="$$(tput sgr0)"; BLUE="$$(tput setaf 4)"; \
+	  BOLD="$$(tput bold)"; DIM="$$(tput dim)"; RESET="$$(tput sgr0)"; BLUE="$$(tput setaf 4)"; GREEN="$$(tput setaf 2)"; \
 	else \
-	  BOLD=""; DIM=""; RESET=""; BLUE=""; \
+	  BOLD=""; DIM=""; RESET=""; BLUE=""; GREEN=""; \
 	fi; \
 	echo "$${BOLD}Offband Make targets$${RESET}"; \
 	echo "$${DIM}Tip:$${RESET} run '$${BOLD}make -n <target>$${RESET}' for a dry run (no commands executed)."; \
 	echo; \
 	grep -E '^[a-zA-Z0-9_.-]+:.*?## .*$$' $(MAKEFILE_LIST) \
-	  | awk -v B="$$BOLD" -v R="$$RESET" -v D="$$DIM" -v C="$$BLUE" \
-	    'BEGIN{FS=":.*?## "}{printf "  %s%-16s%s %s\n", C,$$1,R,$$2}'; \
+	  | awk -v B="$$BOLD" -v R="$$RESET" -v C="$$BLUE" 'BEGIN{FS=":.*?## "}{printf "  %s%-18s%s %s\n", C,$$1,R,$$2}'; \
+	echo; \
+	echo "$${BOLD}Key flows$${RESET}"; \
+	echo "  $${GREEN}deploy$${RESET}      Manual sync on server (force git fetch/reset/clean + nginx reload). Bypasses queue."; \
+	echo "  $${GREEN}deploy-now$${RESET}  Immediate pull via systemd on the server, then shows recent logs."; \
 	echo; \
 	echo "$${BOLD}Examples$${RESET}"; \
-	echo "  make push"; \
-	echo "  make deploy"; \
-	echo "  make log M=\"Short note for logs\""; \
+	echo "  make push            # commit+push to GitHub"; \
+	echo "  make deploy-now      # trigger server pull now (will prompt for sudo on server)"; \
+	echo "  make tail            # live-follow site-update.service logs"; \
+	echo "  make log M=\"Fixed hero spacing\"  # add a UTC security log entry"; \
+	echo "  make audit           # strict pre-publish checks"; \
 	echo
 	
 .PHONY: push deploy deploy-now push-deploy doctor preflight help serve log audit
@@ -215,14 +226,21 @@ audit:
 	[ $$MISSING -eq 0 ] && echo "✓ asset links resolve" || exit 1
 
 	@# 9) no stray /tools/ links in public pages (should be /security/tools/)
-	@sh -c 'if grep -R -n "href=\"/tools/" -- . --exclude-dir=tools --exclude-dir=.git --exclude=makefile --exclude=.well-known 2>/dev/null; then \
-	  echo "✗ found /tools/ links in pages (use /security/tools/)"; exit 1; \
-	else echo "✓ no stray /tools/ links"; fi'
+	@sh -c 'if grep -R -n "href=\"/tools/\"" -- . --exclude-dir=tools --exclude-dir=.git --exclude=makefile --exclude=.well-known 2>/dev/null; then echo "✗ found /tools/ links in pages (use /security/tools/)"; exit 1; else echo "✓ no stray /tools/ links"; fi'
 
 	@# 10) scripts sanity: new-log.sh exists, is executable, has shebang
 	@test -f scripts/new-log.sh || { echo "✗ missing scripts/new-log.sh"; exit 1; }
 	@test -x scripts/new-log.sh || { echo "✗ scripts/new-log.sh is not executable (chmod +x)"; exit 1; }
 	@head -1 scripts/new-log.sh | grep -q '^#!/' || { echo "✗ scripts/new-log.sh missing shebang"; exit 1; }
 	@echo "✓ scripts/new-log.sh ok"
+
+	@# 11) secret scan: obvious private keys or cloud secrets should never be present
+	@sh -c 'if grep -R -nE "-----BEGIN (RSA |OPENSSH |DSA |EC )?PRIVATE KEY-----|AWS_SECRET_ACCESS_KEY|aws_secret_access_key" -- . --exclude-dir=.git --exclude-dir=tools --exclude-dir=private --binary-files=without-match 2>/dev/null; then echo "✗ potential secret material detected in repo"; exit 1; else echo "✓ no obvious secrets found"; fi'
+
+	@# 12) permissions: PGP public key should not be group/world-writable (accept 600/640/644)
+	@sh -c 'if [ -f keys/offband.asc ]; then M=$$(stat -f "%p" keys/offband.asc 2>/dev/null | sed -E "s/^.*([0-7]{3})$$/\\1/"); case "$$M" in 600|640|644) echo "✓ key file perms ok ($$M)";; *) echo "✗ keys/offband.asc perms are $$M (expected 600/640/644)"; exit 1;; esac; fi'
+	
+	@# 13) security.txt Expires sanity (if present): must be RFC3339 Zulu and not in the past (macOS/BSD date)
+	@sh -c 'EXP="$$(grep -E "^Expires:" .well-known/security.txt | sed -E "s/^Expires:[[:space:]]*//")"; if [ -n "$$EXP" ]; then if date -u -j -f "%Y-%m-%dT%H:%M:%SZ" "$$EXP" "+%s" >/dev/null 2>&1; then NOW=$$(date -u "+%s"); TGT=$$(date -u -j -f "%Y-%m-%dT%H:%M:%SZ" "$$EXP" "+%s"); if [ "$$TGT" -le "$$NOW" ]; then echo "✗ .well-known/security.txt Expires is in the past"; exit 1; else echo "✓ security.txt Expires ok"; fi; else echo "✗ .well-known/security.txt Expires has invalid format (use YYYY-MM-DDThh:mm:ssZ)"; exit 1; fi; else echo "· security.txt has no Expires (ok, but consider adding one)"; fi'
 
 	@echo "✓ audit complete"
