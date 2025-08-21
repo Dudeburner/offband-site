@@ -19,11 +19,11 @@
       <section class="card hero">
         <h1 class="brandmark">
           <img class="logo-badge" src="/assets/logo-badge.svg" alt="" aria-hidden="true" />
-          Connect with Offband
+          <span class="brand-name">Connect with Offband</span>
         </h1>
         <p class="lede">
           Offband is a security‑first, community‑driven sandbox: homelab notes,
-          OSINT experiments, repeatable setups, and small tools — built in public.
+          repeatable setups, and small tools — built in public.
         </p>
       </section>
 
@@ -36,7 +36,8 @@
           </ul>
           <p class="muted">
             Prefer encryption? Use the PGP widget below or fetch our key (and fingerprint) in
-            <a href="/security.txt">security.txt</a>.
+            <a href="/.well-known/security.txt">security.txt</a>. For responsible disclosures, please see our
+            <a href="/security/">Security</a> page.
           </p>
         </article>
 
@@ -44,16 +45,14 @@
 	    <h3>Encrypt a message</h3>
 	    <p class="muted">Browser‑side PGP. Nothing leaves your machine until you send it.</p>
 
-	    <label>Recipient
-	      <select id="pgp-recipient">
-	        <option value="contact@offband.dev">contact@offband.dev</option>
-	        <option value="security@offband.dev">security@offband.dev</option>
-	      </select>
-	    </label>
+        <label for="pgp-recipient">Recipient</label>
+        <select id="pgp-recipient">
+          <option value="contact@offband.dev">contact@offband.dev</option>
+          <option value="security@offband.dev">security@offband.dev</option>
+        </select>
 
-	    <label>Message
-	      <textarea id="pgp-plain" rows="12" style="width:100%;box-sizing:border-box;" placeholder="Write your message…"></textarea>
-	    </label>
+        <label for="pgp-plain">Message</label>
+        <textarea id="pgp-plain" rows="12" style="width:100%;box-sizing:border-box;" placeholder="Write your message…"></textarea>
 
 	    <div class="actions" style="margin: 8px 0;">
 	      <button class="btn btn--primary" id="pgp-encrypt" type="button">Encrypt</button>
@@ -62,9 +61,8 @@
 	      <a class="btn" id="pgp-email" href="#">Open in email</a>
 	    </div>
 
-	    <label>Encrypted (ASCII‑armored)
-	      <textarea id="pgp-armored" rows="16" style="width:100%;box-sizing:border-box;font-family:monospace;" readonly placeholder="-----BEGIN PGP MESSAGE-----"></textarea>
-	    </label>
+        <label for="pgp-armored">Encrypted (ASCII‑armored)</label>
+        <textarea id="pgp-armored" rows="16" style="width:100%;box-sizing:border-box;font-family:monospace;" readonly placeholder="-----BEGIN PGP MESSAGE-----"></textarea>
 	  </section>
 
       <footer data-include="/components/footer.html"></footer>
@@ -74,7 +72,7 @@
 <script>
 (function(){
   // Prefer a locally hosted, pinned version; fall back to CDN if missing
-  var LOCALE_SRC = '/assets/vendor/openpgp-5.11.1.min.js';
+  var LOCAL_SRC = '/assets/vendor/openpgp-5.11.1.min.js';
   var CDN_SRC    = 'https://unpkg.com/openpgp@5.11.1/dist/openpgp.min.js';
   var loaded = false;
 
@@ -86,11 +84,16 @@
     document.head.appendChild(s);
   }
 
-  function onReady(){ loaded = true; }
+  function onReady(){
+    loaded = true;
+    var enc = document.getElementById('pgp-encrypt');
+    if (window.openpgp && enc) enc.disabled = false;
+    try { window.dispatchEvent(new Event('openpgp:ready')); } catch (e) {}
+  }
   function onFail(){ if (!loaded) inject(CDN_SRC, {referrerpolicy:'no-referrer'}, onReady, function(){ /* both failed */ }); }
 
   // 1) Try local pinned asset first
-  inject(LOCALE_SRC, null, onReady, onFail);
+  inject(LOCAL_SRC, null, onReady, onFail);
 
   // 2) Guard: if lib didn’t load in time, disable Encrypt to avoid false sense of security
   setTimeout(function(){
@@ -104,7 +107,5 @@
 </script>
 <!-- Standardized widget that wires Encrypt/Copy/Download/Email -->
 <script defer src="/assets/pgp-widget.js"></script>
-<!-- Keep security.js for dashboard placeholder logic only -->
-<script defer src="/assets/security.js"></script>
 </body>
 </html>
