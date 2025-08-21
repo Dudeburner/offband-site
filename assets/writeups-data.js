@@ -40,12 +40,20 @@
     try {
       const res = await fetch(new URL('index.json', POSTS_DIR), { credentials: 'omit', cache: 'no-cache' });
       if (res.ok) {
-        const arr = await res.json();
-        if (Array.isArray(arr) && arr.length) {
-          return unique(arr
-            .filter(h => typeof h === 'string' && /\/writeups\/posts\/.+\.html?$/i.test(h))
-            .map(h => norm(h))
-          );
+        const data = await res.json();
+        if (Array.isArray(data) && data.length) {
+          const hrefs = data.map(entry => {
+            if (typeof entry === 'string') return entry; // already an href
+            if (entry && typeof entry === 'object') {
+              if (entry.href) return entry.href;
+              if (entry.file) {
+                const f = String(entry.file).replace(/^\/*/, '');
+                return f.startsWith('/writeups/posts/') ? f : `/writeups/posts/${f}`;
+              }
+            }
+            return null;
+          }).filter(Boolean);
+          if (hrefs.length) return unique(hrefs.map(h => norm(h)));
         }
       }
     } catch (_) {}
