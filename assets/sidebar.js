@@ -8,6 +8,21 @@
   const BODY_COLLAPSE_CLASS = 'sidebar-collapsed';
   const WU = (typeof window !== 'undefined' && window.WriteupsData) ? window.WriteupsData : null;
 
+  // Lazy-load the shared writeups-data module if not present
+  function loadScript(src) {
+    return new Promise((res, rej) => {
+      const s = document.createElement('script');
+      s.src = src;
+      s.onload = () => res();
+      s.onerror = () => rej(new Error('Failed to load ' + src));
+      document.head.appendChild(s);
+    });
+  }
+  async function ensureWriteupsData() {
+    if (window.WriteupsData) return;
+    try { await loadScript('/assets/writeups-data.js'); } catch {}
+  }
+
   // ---------------- Core collapse state ----------------
   function setSidebarCollapsed(collapsed) {
     const body = document.body;
@@ -113,6 +128,8 @@
 
   // Build Writeups tree from shared data (categories -> posts)
   async function populateWriteupsFromShared(nav){
+    await ensureWriteupsData();
+    const WU = window.WriteupsData;
     if (!WU || typeof WU.listPosts !== 'function' || typeof WU.groupByCategory !== 'function') return;
     // Find the Writeups folder by its anchor
     const folderLink = nav.querySelector('.tree .folder > .row a[href="/writeups/"]');
@@ -175,10 +192,9 @@
 
   async function autoPopulate(nav){
     try {
-      // Prefer shared module for Writeups (categories -> posts). If not present, fall back to simple scraping.
-      if (WU && typeof populateWriteupsFromShared === 'function') {
-        try { await populateWriteupsFromShared(nav); } catch(_) {}
-      } else {
+      let usedShared = false;
+      try { await populateWriteupsFromShared(nav); usedShared = true; } catch(_) {}
+      if (!usedShared) {
         try {
           const writeups = await getLinks('/writeups/', (href) => /\/writeups\//.test(href) && !(/\/?index\.html?$/i.test(href)), 5);
           insertItems(nav.querySelector('.auto-writeups'), writeups);

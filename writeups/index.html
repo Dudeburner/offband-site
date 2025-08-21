@@ -178,11 +178,33 @@
     });
   }
 
+  // Fallback: read /writeups/posts/index.json accepting strings OR objects
+  async function fetchManifestUrls(){
+    try {
+      const res = await fetch('/writeups/posts/index.json', { credentials: 'omit', cache: 'no-cache' });
+      if (!res.ok) return [];
+      const data = await res.json();
+      if (!Array.isArray(data)) return [];
+      return data.map(entry => {
+        if (typeof entry === 'string') return entry; // already an href
+        if (entry && typeof entry === 'object') {
+          if (entry.href) return entry.href;
+          if (entry.file) return `/writeups/posts/${String(entry.file).replace(/^\/*/, '')}`;
+        }
+        return null;
+      }).filter(Boolean);
+    } catch { return []; }
+  }
+
   // DISCOVER + HYDRATE
   let posts = [];
   try{
-    const urls = await discoverPosts();
-    const hydrated = await Promise.all(urls.map(hydratePost));
+    let urls = await discoverPosts();
+    if (!urls || !urls.length) {
+      // Fallback: parse our local manifest even if entries are objects
+      urls = await fetchManifestUrls();
+    }
+    const hydrated = await Promise.all((urls || []).map(hydratePost));
     posts = hydrated.sort(byDateDesc);
   }catch(e){ /* leave posts empty */ }
 
