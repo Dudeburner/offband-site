@@ -6,6 +6,7 @@
   const COLLAPSE_KEY = 'offband.sidebarCollapsed';
   const TREE_STATE_KEY = 'sidebar.v1'; // matches prior storage
   const BODY_COLLAPSE_CLASS = 'sidebar-collapsed';
+  const WU = (typeof window !== 'undefined' && window.WriteupsData) ? window.WriteupsData : null;
 
   // ---------------- Core collapse state ----------------
   function setSidebarCollapsed(collapsed) {
@@ -110,14 +111,82 @@
     placeholder.replaceWith(frag);
   }
 
+  // Build Writeups tree from shared data (categories -> posts)
+  async function populateWriteupsFromShared(nav){
+    if (!WU || typeof WU.listPosts !== 'function' || typeof WU.groupByCategory !== 'function') return;
+    // Find the Writeups folder by its anchor
+    const folderLink = nav.querySelector('.tree .folder > .row a[href="/writeups/"]');
+    if (!folderLink) return;
+    const folder = folderLink.closest('.folder');
+    const list = folder && folder.querySelector(':scope > ul');
+    if (!list) return;
+    try {
+      const posts = await WU.listPosts();
+      const grouped = WU.groupByCategory(posts);
+      // Clear existing (placeholder) items
+      list.innerHTML = '';
+      for (const [cat, items] of grouped.entries()) {
+        const li = document.createElement('li');
+        li.className = 'folder';
+        li.setAttribute('aria-expanded', 'false');
+        // category header row
+        const row = document.createElement('div');
+        row.className = 'row';
+        const span = document.createElement('span');
+        span.className = 'label';
+        span.textContent = cat;
+        row.appendChild(span);
+        li.appendChild(row);
+        // children list
+        const ul = document.createElement('ul');
+        items.forEach(p => {
+          const cli = document.createElement('li');
+          const a = document.createElement('a');
+          a.href = p.href;
+          a.textContent = p.title || p.href.split('/').pop();
+          cli.appendChild(a);
+          ul.appendChild(cli);
+        });
+        li.appendChild(ul);
+        list.appendChild(li);
+      }
+      // Wire toggles on the new category folders
+      list.querySelectorAll(':scope > li.folder > .row').forEach((row) => {
+        row.addEventListener('click', (e) => {
+          if (e.target && e.target.tagName === 'A') return;
+          const parent = row.parentElement;
+          const open = parent.getAttribute('aria-expanded') === 'true';
+          parent.setAttribute('aria-expanded', open ? 'false' : 'true');
+        });
+        row.addEventListener('keydown', (e) => {
+          const parent = row.parentElement;
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); const open = parent.getAttribute('aria-expanded') === 'true'; parent.setAttribute('aria-expanded', open ? 'false' : 'true'); }
+          if (e.key === 'ArrowRight') { parent.setAttribute('aria-expanded', 'true'); }
+          if (e.key === 'ArrowLeft')  { parent.setAttribute('aria-expanded', 'false'); }
+        });
+      });
+      // Ensure the parent Writeups folder is open so categories are visible on first render
+      setOpen(folder, true);
+      persistTreeState(nav);
+    } catch (_) {
+      // Silent fail; sidebar can remain static
+    }
+  }
+
   async function autoPopulate(nav){
     try {
+      // Prefer shared module for Writeups (categories -> posts). If not present, fall back to simple scraping.
+      if (WU && typeof populateWriteupsFromShared === 'function') {
+        try { await populateWriteupsFromShared(nav); } catch(_) {}
+      } else {
+        try {
+          const writeups = await getLinks('/writeups/', (href) => /\/writeups\//.test(href) && !(/\/?index\.html?$/i.test(href)), 5);
+          insertItems(nav.querySelector('.auto-writeups'), writeups);
+        } catch(_){}
+      }
+      // Logs remain simple: pull latest few from the logs index page
       try {
-        const writeups = await getLinks('/writeups/', (href) => /\/writeups\//.test(href) && !/\/\?index\.html?$/.test(href), 5);
-        insertItems(nav.querySelector('.auto-writeups'), writeups);
-      } catch(_){}
-      try {
-        const logs = await getLinks('/security/logs/', (href) => /\/security\/logs\//.test(href) && !/\/\?index\.html?$/.test(href), 5);
+        const logs = await getLinks('/security/logs/', (href) => /\/security\/logs\//.test(href) && !(/\/?index\.html?$/i.test(href)), 5);
         insertItems(nav.querySelector('.auto-logs'), logs);
       } catch(_){}
     } catch(_){}

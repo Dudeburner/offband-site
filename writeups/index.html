@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="/assets/site.css" />
   <script defer src="/assets/include.js"></script>
   <script defer src="/assets/sidebar.js"></script>
+  <script src="/assets/writeups-data.js"></script>
 </head>
 <body class="has-hero">
   <div data-include="/components/topbar.html"></div>
@@ -99,20 +100,10 @@
   }
 
   async function discoverPosts(){
-    // Get directory listing and collect .html files (ignore indexes)
-    let urls = [];
-    try {
-      const doc = await fetchHTML(POSTS_DIR);
-      urls = Array.from(doc.querySelectorAll('a[href]'))
-        .map(a => a.getAttribute('href'))
-        .filter(href => href && /\.html?$/.test(href) && !/\/?index\.html?$/i.test(href))
-        .map(href => new URL(href, POSTS_DIR).pathname)
-        .filter((v,i,arr) => arr.indexOf(v)===i);
-    } catch(e){
-      // If listing fails, fall back to any statically linked items already on the page
-      urls = Array.from(list.querySelectorAll('a[href^="/writeups/posts/"]')).map(a => a.getAttribute('href'));
+    if (window.WriteupsData && typeof window.WriteupsData.discoverPosts === 'function') {
+      return window.WriteupsData.discoverPosts();
     }
-    return urls;
+    return [];
   }
 
   function parseDateFromFilename(path){
