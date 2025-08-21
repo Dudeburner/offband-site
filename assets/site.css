@@ -241,3 +241,57 @@ nav.sidebar .toolbar { display: flex; gap: .5rem; margin-bottom: .5rem; }
   font-size: 1.5rem; /* larger than nav links */
   font-weight: 600;
 }
+
+/* --- Security page + layout aliases (non-breaking) --- */
+
+/* 1) Hero: ensure the badge scales in hero just like brand-logo */
+.hero .logo-badge { width: 96px; height: 96px; }
+
+/* 2) Grid aliases to match existing markup without editing HTML */
+.feature-grid { display: grid; gap: var(--gap-3); }
+.grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--gap-3); }
+/* (we already have .grid and .grid.cols-*; these are harmless aliases) */
+
+/* 3) Utilities used on security page */
+.tile { display: block; }
+.kpi { font-size: 1.25rem; font-weight: 600; }
+.meta { color: var(--muted); font-size: .9rem; }
+.list-tight { margin: 0; padding-left: 1.1rem; }
+.list-tight li { margin: .25rem 0; }
+
+/* status text helpers (we already color chips; this covers plain text) */
+.ok { color: var(--ok); }
+.degraded { color: var(--warn); }
+
+/* 4) Sidebar tree selector (support both nav.sidebar and .sidebar nav) */
+.sidebar nav .tree { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .25rem; }
+/* keep existing rule too: nav.sidebar .tree { … } (already present) */
+
+/* 5) Cards wrapper (common on landing/security) */
+.cards { display: grid; gap: var(--gap-3); }
+@media (min-width: 641px) { .cards.cols-3 { grid-template-columns: repeat(3, minmax(0,1fr)); } }
+@media (min-width: 641px) { .cards.cols-2 { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+
+/* High-contrast keyboard focus on key UI */
+.btn:focus-visible,
+.badge:focus-visible {
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
+/* Screen-reader only utility (for accessible labels/descriptions) */
+.sr-only {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Mobile hero logo-badge downscale to match brand-logo */
+@media (max-width: 640px) {
+  .hero .logo-badge { width: 64px; height: 64px; }
+}

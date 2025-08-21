@@ -5,6 +5,7 @@
 tools/*
 !tools/new-log.sh
 writeups/posts/writeup-template.html
+templates
 # Private/secret material (never commit)
 .gnupg/
 *.key
