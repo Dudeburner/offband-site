@@ -1,0 +1,257 @@
+<article class="card prose" id="post">
+  <h1>Initial Web Server Hardening for Deployment: A Step-by-Step Guide</h1>
+
+  <h2>Who This Is For</h2>
+  <p>
+    If you're a developer, system administrator, or an enthusiastic hobbyist with some familiarity with Linux, this guide is crafted for you. It aims to help you securely deploy a web server on an Ubuntu virtual machine, whether you're launching your very first website or looking to tighten up your server’s defenses. We’ll walk through practical, essential hardening steps in a way that’s approachable and clear.
+  </p>
+
+  <h2>What You’ll Build</h2>
+  <p>
+    By the end of this tutorial, your Ubuntu server will be running Nginx serving your website, with SSH access locked down securely, a firewall protecting your machine, fail2ban defending against brute-force attacks, and basic monitoring tools in place to keep tabs on your server’s health. This foundation will set you up for a safer, more reliable deployment.
+  </p>
+
+  <h2>Context & Choices</h2>
+  <p>
+    Choosing the right tools for your server stack is a key part of building a solid foundation. We settled on <strong>Ubuntu</strong> as our operating system because it strikes a great balance between stability, security, and ease of use. Ubuntu LTS releases provide 5 years of support, making them a reliable choice for long-term deployments. While Debian is known for its rock-solid stability, Ubuntu tends to have more up-to-date packages and broader community support, which can be helpful for newcomers and those wanting the latest security patches without jumping through hoops. CentOS, historically popular in enterprise environments, has shifted its focus recently, leading to uncertainty in long-term support, so we opted for Ubuntu’s predictable release cycle.
+  </p>
+  <p>
+    For the web server, <strong>Nginx</strong> was our choice over alternatives like Apache. Nginx is very efficient at handling many small, simultaneous connections with low resource usage, making it ideal for serving static content or acting as a reverse proxy. Apache is more flexible and supports a wider range of features and modules but tends to be heavier on system resources. This makes Nginx a better fit for many lightweight or high-traffic scenarios, while Apache might be preferred when complex configurations or legacy support are needed.
+  </p>
+  <p>
+    When it comes to securing the server, we use <strong>UFW (Uncomplicated Firewall)</strong> because it provides a user-friendly interface to the underlying iptables firewall system. It simplifies managing network rules without sacrificing power. Complementing this, <strong>fail2ban</strong> watches your logs for suspicious activity—like repeated failed SSH login attempts—and automatically blocks offending IP addresses. This combination offers a robust defense against common attack vectors while being easy to maintain.
+  </p>
+
+  <h2>1. Create Non-Root User & Secure SSH</h2>
+  <p>
+    Direct root login over SSH is a notorious security risk. It exposes the most powerful account on your server to brute-force attacks, which can quickly lead to compromise. Instead, the best practice is to create a new user with <code>sudo</code> privileges and disable root SSH access.
+  </p>
+  <p>
+    Here’s an important real-world lesson: when we first disabled root login on a test server, we accidentally locked ourselves out because we hadn’t properly tested the new user’s SSH access. It was a tense moment, but thankfully we could still access the server through our cloud provider’s web console. To avoid this headache, always test logging in as your new user before disabling root SSH access. This way, you won’t be stuck in a bind. Additionally, it’s wise to keep an active root SSH session open while testing the new user’s access; only close the root session once you have confirmed the new user can log in successfully.
+  </p>
+  <pre><code>sudo adduser deployuser
+sudo usermod -aG sudo deployuser
+</code></pre>
+  <p>
+    Next, copy your SSH public key to the new user’s <code>~/.ssh/authorized_keys</code> to enable key-based authentication, which is far more secure than passwords:
+  </p>
+  <pre><code>sudo mkdir /home/deployuser/.ssh
+sudo cp ~/.ssh/authorized_keys /home/deployuser/.ssh/
+sudo chown -R deployuser:deployuser /home/deployuser/.ssh
+sudo chmod 700 /home/deployuser/.ssh
+sudo chmod 600 /home/deployuser/.ssh/authorized_keys
+</code></pre>
+  <p>
+    Then, edit the SSH daemon configuration to disable root login and password authentication:
+  </p>
+  <pre><code>sudo nano /etc/ssh/sshd_config
+# Set:
+PermitRootLogin no
+PasswordAuthentication no
+</code></pre>
+  <p>
+    After saving, restart SSH to apply the changes:
+  </p>
+  <pre><code>sudo systemctl restart sshd
+</code></pre>
+  <p>
+    Remember, disabling password authentication forces all users to use SSH keys, which are much harder to brute force. Disabling root login means attackers can’t directly target the root account, making your server a tougher nut to crack.
+  </p>
+
+  <h2>2. Install and Configure Nginx</h2>
+  <p>
+    Installing Nginx is straightforward:
+  </p>
+  <pre><code>sudo apt update
+sudo apt install nginx
+</code></pre>
+  <p>
+    Enable and start the Nginx service so it runs on boot and immediately:
+  </p>
+  <pre><code>sudo systemctl enable nginx
+sudo systemctl start nginx
+</code></pre>
+  <p>
+    Rather than putting all your site configurations into a single file, Nginx uses a neat system where individual site configs live in <code>/etc/nginx/sites-available/</code>, and you enable them by linking to <code>/etc/nginx/sites-enabled/</code>. This separation makes managing multiple sites easier and cleaner.
+  </p>
+  <p>
+    To create a server block for your domain (let’s say <code>example.com</code>), open a new config file:
+  </p>
+  <pre><code>sudo nano /etc/nginx/sites-available/example.com
+</code></pre>
+  <p>
+    Here’s a basic config and what each part does:
+  </p>
+  <pre><code>server {
+    listen 80;  # Listen on port 80 for HTTP requests
+    server_name example.com www.example.com;  # The domain names this server block responds to
+
+    root /var/www/example.com/html;  # The directory where your website files live
+    index index.html;  # The default file to serve when a directory is requested
+
+    location / {
+        try_files $uri $uri/ =404;  # Try to serve the requested file, or a directory index; if not found, return 404
+    }
+}
+</code></pre>
+  <p>
+    Enable the site by creating a symbolic link:
+  </p>
+  <pre><code>sudo ln -s /etc/nginx/sites-available/example.com /etc/nginx/sites-enabled/
+</code></pre>
+  <p>
+    Always test your Nginx configuration for errors before reloading:
+  </p>
+  <pre><code>sudo nginx -t
+sudo systemctl reload nginx
+</code></pre>
+  <p>
+    This modular approach to site configs helps keep your server organized and makes it easier to enable or disable sites without touching the main Nginx config.
+  </p>
+
+  <h2>3. Deploy Site Files</h2>
+  <p>
+    Getting your website files onto the server can be done in a few ways. The simplest method is using <code>scp</code>, which copies files securely over SSH:
+  </p>
+  <pre><code>scp -r ./local-site-folder/* deployuser@your-server-ip:/var/www/example.com/html/
+</code></pre>
+  <p>
+    For more efficient updates, especially when you have lots of files or want to sync changes, <code>rsync</code> is a great choice:
+  </p>
+  <pre><code>rsync -avz --progress ./local-site-folder/ deployuser@your-server-ip:/var/www/example.com/html/
+</code></pre>
+  <p>
+    In production environments, many teams automate deployments using tools like GitHub Actions, which push updates directly to the server when you merge code. If you're curious about setting up automated deployments, check out our next tutorial: <a href="/writeups/posts/2025-08-18-automating-web-server-deployment-with-github.html">Automating Web Server Deployment with GitHub</a>.
+  </p>
+  <p>
+    Before deploying, make sure the web root directory exists and has the right permissions:
+  </p>
+  <pre><code>sudo mkdir -p /var/www/example.com/html
+sudo chown -R deployuser:www-data /var/www/example.com
+sudo chmod -R 755 /var/www/example.com
+</code></pre>
+  <p>
+    This setup ensures that your deploy user can manage files, while the web server (running as <code>www-data</code>) can read them.
+  </p>
+
+  <h2>4. Enable Monitoring</h2>
+  <p>
+    Hollywood loves to show hackers staring at flashy dashboards with graphs and alerts, but in reality, simple tools often do the trick. On a fresh $5/month VM, your CPU usage will mostly hover near zero, and RAM usage will be light unless you’re running heavy apps.
+  </p>
+  <p>
+    Start with <code>htop</code>, an interactive process viewer that gives you a real-time look at CPU, memory, and running processes:
+  </p>
+  <pre><code>sudo apt install htop
+</code></pre>
+  <p>
+    You can launch it anytime with <code>htop</code> to see what’s happening under the hood.
+  </p>
+  <p>
+    For log monitoring, the trusty <code>tail -f</code> command lets you watch Nginx’s access and error logs as they update:
+  </p>
+  <pre><code>tail -f /var/log/nginx/access.log /var/log/nginx/error.log
+</code></pre>
+  <p>
+    These simple tools help you catch unusual spikes or errors early. On a $5 VM, if you see memory usage consistently above around 700MB or CPU usage regularly over 50%, it’s likely time to consider scaling up your resources. We’ll backfill a link to scaling strategies in future writeups.
+  </p>
+  <p>
+    When you’re ready to level up, you might explore solutions like Netdata or Prometheus, which offer more comprehensive metrics and alerting.
+  </p>
+
+  <h2>5. Harden with Firewall + fail2ban</h2>
+  <p>
+    Protecting your server’s network is crucial. <strong>UFW</strong> (Uncomplicated Firewall) is a user-friendly wrapper around the powerful iptables firewall system. It lets you define rules without wrestling with complex syntax.
+  </p>
+  <pre><code>sudo ufw default deny incoming
+sudo ufw default allow outgoing
+sudo ufw allow ssh
+sudo ufw allow http
+sudo ufw enable
+sudo ufw status
+</code></pre>
+  <p>
+    Here, we block all incoming connections by default, allow outgoing traffic, and explicitly permit SSH and HTTP traffic.
+  </p>
+  <p>
+    Next, install <strong>fail2ban</strong>, which monitors log files for suspicious activity—like repeated failed SSH login attempts—and temporarily blocks those IPs:
+  </p>
+  <pre><code>sudo apt install fail2ban
+sudo systemctl enable fail2ban
+sudo systemctl start fail2ban
+</code></pre>
+  <p>
+    Create a basic jail configuration for SSH by editing:
+  </p>
+  <pre><code>sudo nano /etc/fail2ban/jail.local
+</code></pre>
+  <p>
+    Add the following:
+  </p>
+  <pre><code>[sshd]
+enabled = true
+port = ssh
+filter = sshd
+logpath = /var/log/auth.log
+maxretry = 5
+</code></pre>
+  <p>
+    Restart fail2ban to apply your changes:
+  </p>
+  <pre><code>sudo systemctl restart fail2ban
+</code></pre>
+  <p>
+    <em>Aside:</em> UFW controls which network connections are allowed into your server by setting firewall rules upfront. In contrast, fail2ban acts after a connection is established by monitoring logs for abusive or suspicious behavior and then blocking those IP addresses temporarily. Together, they provide a layered approach to securing your server’s network access.
+  </p>
+
+  <h2>Verification Steps</h2>
+  <ul>
+    <li>
+      Check which services are listening on your server’s ports:
+      <pre><code>ss -tuln | grep -E '22|80'</code></pre>
+      You should see SSH on port 22 and Nginx on port 80.
+    </li>
+    <li>
+      Verify your firewall status:
+      <pre><code>sudo ufw status</code></pre>
+      Confirm that only SSH and HTTP ports are allowed.
+    </li>
+    <li>
+      Check that fail2ban is monitoring SSH:
+      <pre><code>sudo fail2ban-client status sshd</code></pre>
+      This shows the jail status and any currently banned IPs.
+    </li>
+    <li>
+      Test fail2ban by intentionally entering a wrong password several times when SSH’ing in as your new user. After the max retries, your IP should be banned.
+    </li>
+    <li>
+      If you accidentally ban yourself, unban your IP with:
+      <pre><code>sudo fail2ban-client set sshd unbanip your.ip.address.here</code></pre>
+    </li>
+    <li>
+      Finally, confirm that root login is disabled by trying to SSH as root—it should be denied.
+    </li>
+    <li>
+      Open your domain in a browser to confirm the index page loads. If you get a 404 error, check your Nginx configuration and file permissions.
+    </li>
+  </ul>
+
+  <h2>Common Pitfalls</h2>
+  <ul>
+    <li><strong>Mislinked Nginx config:</strong> Forgetting to enable your site by linking <code>sites-available</code> to <code>sites-enabled</code> can cause frustrating 404 errors.</li>
+    <li><strong>Rsync dotfiles:</strong> Accidentally syncing hidden files (like <code>.git</code> or <code>.env</code>) can expose sensitive data—be mindful of what you include.</li>
+    <li><strong>Monitoring agent issues:</strong> Some monitoring tools require extra dependencies or permissions; starting simple helps avoid these headaches.</li>
+    <li><strong>Firewall blocking legitimate traffic:</strong> Always double-check which ports are open before enabling UFW to avoid accidentally locking yourself out.</li>
+    <li><strong>SSH brute-force attempts:</strong> Keep an eye on your auth logs regularly; while fail2ban helps, no solution is completely foolproof.</li>
+  </ul>
+
+  <h2>Next Up</h2>
+  <p>
+    With your server now hardened and running smoothly, the next steps include securing your site with <strong>TLS via Let’s Encrypt</strong>, automating deployments through scripts or CI/CD pipelines, and setting up alerting for critical events. Dive into our next tutorial to learn how to automate your web server deployment with GitHub: 
+    <a href="/writeups/posts/2025-08-18-automating-web-server-deployment-with-github.html">Automating Web Server Deployment with GitHub</a>.
+  </p>
+
+  <h2>Changelog Starter</h2>
+  <ul>
+    <li><strong>2025-08-17:</strong> Initial writeup created covering user creation, SSH hardening, Nginx setup, site deployment, monitoring, firewall, and fail2ban configuration.</li>
+  </ul>
+</article>

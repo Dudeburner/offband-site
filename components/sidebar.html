@@ -26,7 +26,6 @@
       </div>
       <ul>
         <li><div class="row"><a href="/writeups/">All writeups</a></div></li>
-        <li><div class="row"><a href="/writeups/posts/coming-soon.html">Coming soon…</a></div></li>
         <li class="auto-insert auto-writeups"></li>
       </ul>
     </li>
@@ -40,6 +39,7 @@
       <ul>
         <li><div class="row"><a href="/security/">Overview</a></div></li>
         <li><div class="row"><a href="/security/logs/">Logs</a></div></li>
+        <li><div class="row"><a href="/security/tools/">Tools</a></div></li>
         <li class="auto-insert auto-logs"></li>
       </ul>
     </li>
@@ -51,156 +51,8 @@
         <span class="label">Connect</span>
       </div>
       <ul>
-        <li><div class="row"><a href="/connect/">About</a></div></li>
-        <li><div class="row"><span class="muted">Contact (soon)</span></div></li>
+        <li><div class="row"><a href="/connect/">Connect</a></div></li>
       </ul>
     </li>
   </ul>
-
-  <script>
-  (function () {
-    const STORAGE_KEY = 'sidebar.v1';
-    const nav = document.currentScript.closest('nav.sidebar') || document.currentScript.parentElement;
-    if (!nav) return;
-
-    // Restore expanded state
-    try {
-      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-      nav.querySelectorAll('.folder').forEach((li, idx) => {
-        const open = (saved[idx] !== undefined) ? !!saved[idx] : li.hasAttribute('data-open');
-        setOpen(li, open);
-      });
-    } catch (_) {}
-
-    function persist() {
-      const state = {};
-      nav.querySelectorAll('.folder').forEach((li, idx) => {
-        state[idx] = li.getAttribute('aria-expanded') === 'true';
-      });
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (_) {}
-    }
-
-    function setOpen(li, open) {
-      li.setAttribute('aria-expanded', open ? 'true' : 'false');
-      li.dataset.open = open ? 'true' : 'false';
-      const twisty = li.querySelector('.twisty');
-      if (twisty) twisty.textContent = open ? '▾' : '▸';
-    }
-
-    function toggle(li) {
-      const next = li.getAttribute('aria-expanded') !== 'true';
-      setOpen(li, next);
-      persist();
-    }
-
-    function collapseAll() {
-      nav.querySelectorAll('.folder').forEach((li) => setOpen(li, false));
-      persist();
-    }
-
-    function expandAll() {
-      nav.querySelectorAll('.folder').forEach((li) => setOpen(li, true));
-      persist();
-    }
-
-    // Toolbar control: single caret toggle for tree (does not affect sidebar width)
-    (function(){
-      const toolbar = nav.querySelector('.toolbar');
-      if (!toolbar) return;
-      const btnToggle = toolbar.querySelector('#tree-toggle');
-      if (!btnToggle) return;
-
-      const anyOpen = () => !!nav.querySelector('.folder[aria-expanded="true"]');
-      const updateIcon = () => {
-        const open = anyOpen();
-        btnToggle.textContent = open ? '▾' : '▸';
-        btnToggle.setAttribute('aria-pressed', String(open));
-      };
-
-      btnToggle.addEventListener('click', (e) => {
-        e.preventDefault();
-        if (anyOpen()) {
-          collapseAll();
-        } else {
-          expandAll();
-        }
-        updateIcon();
-      });
-
-      // Initialize caret based on restored state
-      updateIcon();
-    })();
-
-    // Make the whole row clickable
-    nav.querySelectorAll('.folder > .row').forEach((row) => {
-      const li = row.parentElement;
-
-      row.addEventListener('click', (e) => {
-        // Allow anchor clicks inside row to pass through
-        if (e.target && e.target.tagName === 'A') return;
-        toggle(li);
-      });
-
-      row.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(li); }
-        if (e.key === 'ArrowRight') { setOpen(li, true); persist(); }
-        if (e.key === 'ArrowLeft')  { setOpen(li, false); persist(); }
-      });
-    });
-
-    // Highlight active link
-    const norm = (p) => (p || '/').replace(/\/+$/, '/') || '/';
-    const here = norm(location.pathname);
-
-    nav.querySelectorAll('a[href]').forEach((a) => {
-      const href = norm(a.getAttribute('href'));
-      if (here === href || (href !== '/' && here.startsWith(href))) {
-        a.classList.add('active');
-        const parent = a.closest('.folder');
-        if (parent) setOpen(parent, true);
-      }
-    });
-
-    // --- Auto-populate recent items from writeups and logs ---
-    (async function autoPopulate(){
-      try {
-        const addItems = (placeholder, items) => {
-          if (!placeholder || !items || !items.length) return;
-          const frag = document.createDocumentFragment();
-          items.forEach(({href, text}) => {
-            const li = document.createElement('li');
-            const row = document.createElement('div');
-            row.className = 'row';
-            const a = document.createElement('a');
-            a.href = href; a.textContent = text || href;
-            row.appendChild(a); li.appendChild(row); frag.appendChild(li);
-          });
-          placeholder.replaceWith(frag);
-        };
-
-        const getLinks = async (url, filterFn, max=5) => {
-          const res = await fetch(url, {credentials: 'omit'});
-          if (!res.ok) throw new Error('fetch failed: ' + url);
-          const html = await res.text();
-          const doc = new DOMParser().parseFromString(html, 'text/html');
-          const links = Array.from(doc.querySelectorAll('a[href]'))
-            .map(a => ({href: a.getAttribute('href'), text: (a.textContent||'').trim()}))
-            .filter(({href, text}) => href && filterFn(href, text));
-          const norm = (h) => (/^https?:\/\//i.test(h)) ? h : new URL(h, url).pathname;
-          return links.slice(0, max).map(({href, text}) => ({href: norm(href), text}));
-        };
-
-        try {
-          const writeups = await getLinks('/writeups/', (href) => /\/writeups\//.test(href) && !/\/?index\.html?$/.test(href), 5);
-          addItems(nav.querySelector('.auto-writeups'), writeups);
-        } catch(_){ }
-
-        try {
-          const logs = await getLinks('/security/logs/', (href) => /\/security\/logs\//.test(href) && !/\/?index\.html?$/.test(href), 5);
-          addItems(nav.querySelector('.auto-logs'), logs);
-        } catch(_){ }
-      } catch(_){ }
-    })();
-  })();
-  </script>
 </nav>

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Automating Web Server Deployment with GitHub (Security First)</title>
+</head>
+<body>
+  <h1>Automating Web Server Deployment with GitHub (Security First)</h1>
+
+  <p>Most deployment guides on the internet treat GitHub like a conveyor belt: push your code, watch the magic happen, move on. We’re going to take a different approach. Offband exists as a transparent lab — a place where <em>everything</em> is visible, not just the finished product. That means we can’t afford to think of GitHub as a black box. Every decision — what goes in the repo, what stays out, how the server pulls updates — carries a security implication.</p>
+
+  <p>This post is not just about wiring up <code>systemd</code> to auto-deploy from a Git repo. It’s also about how to do it intentionally, and why.</p>
+
+  <h2>Why Transparency Matters</h2>
+  <p>From the beginning, Offband was built with the idea that security is sharpened by sunlight. By keeping our repository public, we invite scrutiny. People will clone this repo, poke at our defenses, even attempt to register attacks against our lab services. That’s not a liability — it’s the point. If we can withstand constant inspection, we get stronger.</p>
+
+  <p>But there’s a catch. Transparency doesn’t mean carelessness. Everything in this repository is <em>live</em> — it’s mirrored on GitHub and pulled straight into our deployment tree. Scripts, notes, even experimental tools. If it’s not meant to be seen by the entire internet, it does not belong here. That’s where <code>.gitignore</code> becomes your best friend.</p>
+
+  <p>We develop with the mantra: <strong>assume anything you push will be public, because it will.</strong></p>
+
+  <h2>Full Setup Steps for Beginners</h2>
+  <p>If you’re just getting started, here’s a simple walkthrough to get your server ready for automated deployment:</p>
+  <pre><code>sudo apt update && sudo apt install git systemd -y
+git --version
+systemctl --version
+sudo useradd -m -s /bin/bash deploy
+sudo mkdir -p /srv/site
+sudo chown -R deploy:deploy /srv/site
+sudo chmod 755 /srv/site
+sudo -u deploy git clone https://github.com/your-org/your-repo.git /srv/site</code></pre>
+  <p>First, update package indexes and install <code>git</code> and <code>systemd</code>. Confirm both installed correctly by checking their versions. Then, create a dedicated <code>deploy</code> user to run the deployment safely without root privileges. Create the working directory <code>/srv/site</code>, ensure it’s owned by <code>deploy</code>, and set safe permissions. Finally, clone your repository directly into this directory as the <code>deploy</code> user. This sets the stage for <code>systemd</code> to pull updates smoothly and securely.</p>
+
+  <h2>The Automation Backbone: systemd + Git</h2>
+  <p>Our server doesn’t need to guess when to update. We wire it into <code>systemd</code> so that every few minutes (or on a push trigger, depending on preference), it fetches the latest commits directly from the repo and resets the working directory to match exactly.</p>
+
+  <p>Create the following service unit file at <code>/etc/systemd/system/offband-update.service</code>:</p>
+  <pre><code>[Unit]
+Description=Auto-update Offband site from GitHub
+After=network.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/srv/site
+ExecStart=/usr/bin/git fetch --prune origin
+ExecStartPost=/usr/bin/git reset --hard origin/main
+User=deploy
+Group=deploy
+
+[Install]
+WantedBy=multi-user.target
+</code></pre>
+
+  <p>And a corresponding timer unit at <code>/etc/systemd/system/offband-update.timer</code> to schedule the updates:</p>
+
+  <pre><code>[Unit]
+Description=Run Offband git update every 5 minutes
+
+[Timer]
+OnCalendar=*:0/5
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+</code></pre>
+
+  <h3>Step-by-step: Writing and Enabling Units</h3>
+  <ol>
+    <li>Create the service file <code>/etc/systemd/system/offband-update.service</code> with the content above.</li>
+    <li>Create the timer file <code>/etc/systemd/system/offband-update.timer</code> with the content above.</li>
+    <li>Reload the systemd daemon to recognize new units:
+      <pre><code>sudo systemctl daemon-reload</code></pre>
+    </li>
+    <li>Enable and start the timer to run the service automatically:
+      <pre><code>sudo systemctl enable --now offband-update.timer</code></pre>
+    </li>
+    <li>Verify the timer is active and scheduled:
+      <pre><code>systemctl list-timers --all</code></pre>
+    </li>
+    <li>Check logs for update executions and errors:
+      <pre><code>journalctl -u offband-update.service</code></pre>
+    </li>
+  </ol>
+
+  <h3>Understanding the Unit File Directives</h3>
+  <ul>
+    <li><code>OnCalendar=*:0/5</code>: Runs the timer every 5 minutes, starting at the top of the hour.</li>
+    <li><code>Persistent=true</code>: Ensures that if the timer was missed (e.g. server was down), systemd will run the missed job immediately upon startup. This prevents missed updates.</li>
+    <li><code>WorkingDirectory=/srv/site</code>: Sets the directory where <code>git</code> commands run, ensuring it updates the correct repository.</li>
+    <li><code>User=deploy</code> and <code>Group=deploy</code>: Runs the pull as a non-root user to minimize risk if something goes wrong.</li>
+    <li><code>Type=oneshot</code>: The service runs once per trigger and exits, rather than staying active.</li>
+    <li><code>WantedBy=multi-user.target</code> and <code>WantedBy=timers.target</code>: Define when the service and timer should be started/enabled in the boot sequence.</li>
+  </ul>
+
+  <h2>Additional Setup Notes</h2>
+  <p>If your server setup requires additional directory permissions or SELinux/AppArmor configurations, ensure that the <code>deploy</code> user has sufficient rights to read/write inside <code>/srv/site</code> and execute Git commands.</p>
+
+  <h2>Error Handling and Recovery</h2>
+  <p>Automated deployment can fail for various reasons. Here’s how to handle common issues:</p>
+  <ul>
+    <li><strong>Git fetch or reset fails:</strong> Check network connectivity and GitHub access. Inspect logs with <code>journalctl -u offband-update.service</code>. Fix permission or SSH key issues if using private repos.</li>
+    <li><strong>Ownership or permission issues:</strong> Ensure <code>/srv/site</code> and its contents are owned by <code>deploy</code> and have correct permissions. Use <code>sudo chown -R deploy:deploy /srv/site</code> and verify with <code>ls -l</code>.</li>
+    <li><strong>Rollback strategy:</strong> If a bad commit is deployed, manually reset to the previous known good commit:
+      <pre><code>sudo -u deploy git reset --hard HEAD~1</code></pre>
+      Then disable the timer temporarily to prevent repeated bad updates:
+      <pre><code>sudo systemctl stop offband-update.timer
+sudo systemctl disable offband-update.timer</code></pre>
+      Fix the issue in your repo and re-enable automation afterward.</li>
+  </ul>
+
+  <h2>Browser Verification</h2>
+  <p>After deployment, verify your site is live by visiting its URL in a browser. If you see a 404 or other errors:</p>
+  <ul>
+    <li>Check that the web server is serving files from <code>/srv/site</code>.</li>
+    <li>Confirm that the latest code is present with <code>git log -1</code> run as <code>deploy</code>.</li>
+    <li>Review web server logs for errors.</li>
+    <li>Ensure file permissions allow the web server to read the files.</li>
+  </ul>
+
+  <h2>.gitignore Discipline: Protecting Secrets and Reducing Noise</h2>
+  <p>One of the most critical parts of running a public repo tied directly to production is being vigilant about what you commit. Your <code>.gitignore</code> file is your frontline defense against accidentally exposing secrets or cluttering your repo with unnecessary files.</p>
+  <p>Here’s an example <code>.gitignore</code> snippet:</p>
+  <pre><code>keys/
+.env
+*.log
+node_modules/
+.DS_Store
+</code></pre>
+  <p>Why these entries?</p>
+  <ul>
+    <li><code>keys/</code>: Private SSH keys or credentials should never be committed. Keep them out entirely.</li>
+    <li><code>.env</code>: Environment variables often contain secrets like API keys or database passwords.</li>
+    <li><code>*.log</code>: Log files are ephemeral and can contain sensitive runtime data.</li>
+    <li><code>node_modules/</code>: Dependencies can be rebuilt; no need to commit bulky folders.</li>
+    <li><code>.DS_Store</code>: MacOS-specific metadata files that clutter repos.</li>
+  </ul>
+  <p>Accidental commits happen, and when they do, they can expose you to risk. If you ever commit a secret, treat it as compromised — rotate keys immediately and remove them from history.</p>
+  <p>Also, file permissions matter. For example, if you use SSH keys for deployment, ensure they are locked down:</p>
+  <pre><code>chmod 600 ~/.ssh/id_ed25519</code></pre>
+  <p>This prevents unauthorized users on the server from reading your private keys.</p>
+
+  <h2>Failure Paths: What to Do When Deployment Breaks</h2>
+  <p>No automation is perfect. When deployment breaks, you need a plan that minimizes downtime and risk.</p>
+  <ul>
+    <li><strong>Rollback:</strong> You can revert to the previous known-good commit with:</li>
+  </ul>
+  <pre><code>sudo -u deploy git reset --hard HEAD~1</code></pre>
+  <ul>
+    <li><strong>Use a staging branch:</strong> Instead of deploying directly from <code>main</code>, deploy from a <code>staging</code> branch where you test changes before promoting.</li>
+    <li><strong>Disable the timer:</strong> If automated pulls are causing issues, temporarily stop them:</li>
+  </ul>
+  <pre><code>sudo systemctl stop offband-update.timer
+sudo systemctl disable offband-update.timer</code></pre>
+  <p>Then manually fix the problem before re-enabling automation.</p>
+
+  <h2>Public Repo Model: Maximum Transparency, Minimum Overhead</h2>
+  <p>The simplest setup is what we run here: a <strong>public GitHub repository</strong> directly tied to the production server. Every commit is immediately visible, and within minutes, it’s live.</p>
+
+  <ul>
+    <li><strong>Pros:</strong> Zero friction. No keys, no secrets, just a clone URL. Full transparency. Auditability by anyone.</li>
+    <li><strong>Cons:</strong> Exposure. Anything you commit is instantly public. Scripts and helpers are visible, giving attackers insights.</li>
+  </ul>
+
+  <p>This model only works if you are strict about <code>.gitignore</code> and disciplined about what you publish. For Offband, that discipline is part of the experiment.</p>
+
+  <h2>Alternative Deployment Models</h2>
+  <p>Not everyone wants to run a public lab. Maybe your project is client-facing, maybe you’re not ready to expose every script, or maybe compliance forbids it. In that case, you still want automation — but you’ll want to tighten the pipeline.</p>
+
+  <h3>1. Private Repo with Deploy Key</h3>
+  <pre><code>ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519 -C "deploy@server"
+</code></pre>
+  <p>Add the public key as a deploy key in GitHub, configure SSH with the identity, and set the remote to use <code>git@github.com:org/repo.git</code>. The server pulls securely without exposing the repo.</p>
+
+  <h3>2. CI/CD Push with GitHub Actions</h3>
+  <p>Instead of pulling, your server can receive. Use Actions to build and send artifacts over SCP/rsync. Server listens for a webhook or artifact drop. This way the server never touches GitHub directly.</p>
+
+  <h3>3. Hybrid Model</h3>
+  <p>Split work: Public repo for docs and static content, private repo for sensitive scripts. Systemd units pull from both, merging them at deploy time.</p>
+
+  <h2>Security Implications: Think Before You Push</h2>
+  <p>What does all of this boil down to? Intentionality. Public repos force discipline. Private repos reduce risk but require key management. Hybrid repos balance openness and confidentiality.</p>
+
+  <p>One critical consideration is that if your GitHub account or repository is compromised, an attacker could inject malicious code that automatically deploys to your server. This could lead to full server compromise — including data theft, service disruption, or further lateral attacks. That’s why commit hygiene and strong account security are paramount: every commit should be reviewed, and you should avoid automating pulls from untrusted sources.</p>
+
+  <p>Additionally, the convenience of automated deployment comes with a security tradeoff. The easier it is to push changes live, the greater the risk if your credentials or GitHub account are compromised. We strongly advise enabling two-factor authentication, using deploy keys with limited scopes, and auditing repository access regularly.</p>
+
+  <p>In the public repo model, the stakes are higher because anyone can see your commits. This transparency is a double-edged sword — it invites scrutiny but also exposes your attack surface. Always ask yourself: <em>what belongs in public, what belongs in private, and why?</em></p>
+
+  <p>At Offband, we deliberately run “hot.” Our entire lab is exposed because it makes us sharper. We know people will poke at our defenses. That’s by design. But this isn’t the right model for every project.</p>
+
+  <h2>Further Automation with Bash Script</h2>
+  <p>Once you’re comfortable with this setup, you might want to wrap the deployment process in a helper bash script to handle logging, error checking, or custom hooks. This can make your automation more robust and easier to maintain.</p>
+  <p>Check out our <a href="/security/tools/">security/tools/</a> directory for example scripts and utilities designed to complement this workflow.</p>
+
+  <h2>Closing Thoughts</h2>
+  <p>Automating deployment with GitHub and <code>systemd</code> is simple. The hard part is deciding what that automation means for your security posture.</p>
+
+  <p>We chose transparency because Offband is a lab, a testbed, a target meant to be attacked and defended in full view. You might choose differently — and that’s okay. What matters is that you choose intentionally, not by accident.</p>
+
+  <p>Think of it this way: code can be automated, but security can’t be outsourced. Every push is a decision. Make it count.</p>
+</body>
+</html>

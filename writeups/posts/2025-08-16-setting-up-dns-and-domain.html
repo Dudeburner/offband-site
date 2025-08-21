@@ -1,0 +1,101 @@
+<article class="card prose" id="post">
+  <h1>Setting Up DNS and a Domain: From Zero to Live Server</h1>
+  <h2>Who this is for</h2>
+  <p>If you’re just starting out and feeling a bit overwhelmed by the world of domains, DNS, and servers, this guide is tailored for you. Whether you want to set up a personal blog, a portfolio, or a small project site, this walkthrough will take you from zero to having a fully registered domain, DNS managed through Cloudflare, and a freshly minted virtual machine (VM) ready to receive traffic. You don’t need to be a sysadmin or a networking guru—if you can copy and paste commands and follow along with some web UI steps, you’re already halfway there.</p>
+
+  <h2>What you’ll build</h2>
+  <p>By the end of this guide, you will have a domain name registered with a reputable registrar, delegated to Cloudflare for DNS and TLS management, and a small Linux VM running somewhere in the cloud. This VM will have a public IP address that you can point your DNS records to, making your site accessible to the world. We’re focusing on the foundational setup here—getting the domain and DNS right, and standing up the server. The next guide will cover securing that server, setting up SSH access, and getting your site serving over HTTPS properly.</p>
+
+  <h2>Context &amp; choices</h2>
+  <p>Choosing the right tools and providers can feel like a minefield, so here’s why we picked what we did, along with some alternatives.</p>
+  <ul>
+    <li><strong>Registrar:</strong> We recommend Porkbun because it offers competitive pricing, a clean, easy-to-use interface, and free WHOIS privacy, which keeps your personal info out of public databases. Namecheap is another solid choice, especially if you’re already familiar with it. Cloudflare Registrar is worth considering if your domain qualifies, as it integrates seamlessly with their DNS services. Google Domains still exists in a legacy form, but we find the others more straightforward.</li>
+    <li><strong>DNS &amp; CDN:</strong> Cloudflare’s Free tier is a fantastic option for DNS hosting and edge TLS certificates. It’s globally distributed, fast, and supports HTTP/2 and HTTP/3 out of the box. Even on the free plan, you get a ton of features that would cost extra elsewhere. Using Cloudflare means your site benefits from a CDN layer and robust security features without extra cost.</li>
+    <li><strong>TLD:</strong> We chose <code>.dev</code> because it’s a modern, developer-focused top-level domain that is on the HSTS preload list. This means browsers will always enforce HTTPS, which is excellent for security but requires you to have HTTPS set up from day one. If you want to avoid this requirement, you can pick other TLDs, but we recommend embracing HTTPS early anyway.</li>
+    <li><strong>VM Provider:</strong> Linode (now part of Akamai), DigitalOcean, and Vultr are all reliable cloud providers offering simple VMs at reasonable prices. A 1GB RAM, 1 vCPU, 25GB SSD instance is a great starting point—it’s enough for a static site or small tools without breaking the bank. If you’re just experimenting, you can always pause or destroy the VM to save costs.</li>
+  </ul>
+  <h3>Costs (realistic)</h3>
+  <p>Budgeting upfront helps avoid surprises. Domains typically cost between $8 and $15 per year, though premium names can be pricier. The <code>.dev</code> TLD usually runs around $12–15 per year. Cloudflare’s DNS and edge TLS certificates are free at the entry level, so no worries there. For the VM, expect about $5 per month for a modest instance. If you’re tight on budget, remember you can pause or delete your VM when not in use to avoid ongoing charges.</p>
+
+  <div class="callout">
+    <p><strong>Aside — Why <code>.dev</code> forces HTTPS:</strong> The <code>.dev</code> domain is on the browser HSTS preload list, which means browsers will refuse to connect over plain HTTP and will automatically upgrade to HTTPS. This is great for security but means you must have HTTPS available from day one. Until your origin server is ready, Cloudflare’s edge certificates ensure your site is reachable securely because browsers connect to Cloudflare over HTTPS, and Cloudflare proxies traffic to your server. We’ll tighten origin TLS in the next post.</p>
+  </div>
+
+  <h2>Prerequisites</h2>
+  <p>Before diving in, make sure you have a laptop with a terminal—macOS and Linux systems come with one by default, and Windows users can use Windows Terminal with WSL (Windows Subsystem for Linux) for a similar experience. You’ll also want an SSH key pair on your laptop; this is how you’ll securely log into your VM later without typing passwords. To check if you have one, run:</p>
+  <pre><code>ls ~/.ssh/*.pub</code></pre>
+  <p>If you don’t see any output, generate a new key with:</p>
+  <pre><code>ssh-keygen -t ed25519 -C "you@example.com"</code></pre>
+  <p>Accept the defaults when prompted. Finally, have a payment method ready for both your domain registrar and VM provider.</p>
+
+  <h2>Map of the work</h2>
+  <p>Here’s the high-level plan we’ll follow:</p>
+  <ol>
+    <li>Buy a domain and delegate DNS management to Cloudflare.</li>
+    <li>Configure DNS records in Cloudflare and enforce HTTPS at the edge.</li>
+    <li>Create a VM, find its public IP, and update your DNS records accordingly.</li>
+  </ol>
+
+  <h2>1) Buy a domain &amp; set Cloudflare as DNS host</h2>
+  <p>First, pick a registrar you trust and purchase your domain. We recommend Porkbun because it offers free WHOIS privacy, which means your personal contact info won’t be publicly visible, a nice privacy bonus at no extra cost. Once you have your domain, you’ll hand off DNS authority to Cloudflare so you can manage DNS records there easily and take advantage of their CDN and TLS features.</p>
+  <p>After purchasing, create a free Cloudflare account and click <strong>+ Add a site</strong>. Enter your domain (e.g., <code>example.dev</code>) and select the <strong>Free</strong> plan. Cloudflare will then show you two nameservers, something like <code>alice.ns.cloudflare.com</code> and <code>bob.ns.cloudflare.com</code>. Keep this page handy.</p>
+  <p>Next, go to your registrar’s control panel, find the section to update <strong>Nameservers</strong> for your domain, and replace the existing ones with the two Cloudflare nameservers. Save your changes. DNS propagation can take anywhere from a few minutes to a couple of hours, so hang tight. Cloudflare will email you once they detect the change and become authoritative for your domain.</p>
+
+  <h2>2) Configure DNS in Cloudflare</h2>
+  <p>Once Cloudflare is authoritative for your domain, you’ll manage your DNS records through their dashboard. If you don’t have your VM’s IP address yet, you can temporarily use placeholder values and update them later.</p>
+  <p>To add records, navigate to <strong>DNS</strong> → <strong>Records</strong> → <strong>Add record</strong>. Here’s what to set up:</p>
+  <ul>
+    <li><strong>A record:</strong> Set <code>Name</code> to <code>@</code> (which represents your root domain), and <code>IPv4 address</code> to your VM’s public IPv4 address. If you don’t have it yet, leave it blank for now. Set the proxy status to <em>Proxied</em> (orange cloud) so traffic routes through Cloudflare’s network, enabling HTTPS and CDN features.</li>
+    <li><strong>AAAA record (optional):</strong> If your VM provider gives you an IPv6 address, add an AAAA record with <code>Name</code> = <code>@</code> and the IPv6 address.</li>
+    <li><strong>CNAME record for <code>www</code>:</strong> Point <code>www</code> to <code>@</code>, so that <code>www.example.dev</code> redirects to your root domain.</li>
+  </ul>
+  <p>Next, head to <strong>SSL/TLS</strong> → <strong>Overview</strong> and set the SSL mode to <strong>Full</strong>. This means Cloudflare will connect to your origin server over TLS, but won’t require a valid certificate yet. We’ll upgrade to <strong>Full (strict)</strong> after setting up a proper certificate on your VM in the next guide.</p>
+  <p>Under <strong>SSL/TLS</strong> → <strong>Edge Certificates</strong>, enable <strong>Always Use HTTPS</strong> to redirect all HTTP requests to HTTPS automatically. Also, enable <strong>HTTP/2</strong> and <strong>HTTP/3</strong> under the Network tab for better performance.</p>
+  <p>Finally, create a redirect rule to avoid duplicate content issues by directing <code>www</code> traffic to the apex domain:</p>
+  <pre><code>Rules → Redirects → Create Rule
+If: Hostname equals www.example.dev
+Then: Static redirect to https://example.dev (Status 301)
+  </code></pre>
+  <div class="callout">
+    <p><strong>Aside — Why proxy through Cloudflare now:</strong> Turning the proxy on means browsers connect securely to Cloudflare immediately, which satisfies the <code>.dev</code> HSTS requirement even before your origin server has TLS set up. This makes your site reachable and secure from day one. Next, we’ll install a certificate on your VM and switch to the strict mode.</p>
+  </div>
+
+  <h2>3) Create a VM &amp; find its IP</h2>
+  <p>Now for the fun part: creating your VM. Choose a provider you like—Linode (now part of Akamai), DigitalOcean, or Vultr are all solid choices with straightforward interfaces and good documentation. When picking a region, choose a location close to your expected visitors to reduce latency, though Cloudflare’s CDN helps mitigate this.</p>
+  <p>Select an operating system image; we recommend Ubuntu 24.04 LTS because it’s stable, well-supported, and widely documented. Debian 12 is another excellent choice if you prefer it. For your VM size, a 1GB RAM, 1 vCPU, 25GB SSD instance strikes a good balance between cost and capability—enough to serve static content and run small apps without breaking your budget.</p>
+  <p>During setup, paste your public SSH key (the contents of your <code>.pub</code> file) into the provider’s console. This allows you to log in securely without passwords, which is both safer and more convenient.</p>
+  <p>Launch your VM and wait for it to provision. Once ready, note the public IPv4 address (and IPv6 if provided). This is the address your DNS records will point to.</p>
+
+  <h3>Point DNS at your VM</h3>
+  <p>Head back to Cloudflare’s DNS settings and update your <strong>A</strong> record (and <strong>AAAA</strong> if applicable) for <code>@</code> with the IP address(es) you just obtained. Cloudflare’s network is fast, so these changes typically propagate within a minute or two.</p>
+
+  <h2>Verify</h2>
+  <p>To check that your DNS is resolving correctly, run these commands from your terminal:</p>
+  <pre><code>dig +short example.dev A
+# should print your VM's IPv4
+
+dig +short example.dev AAAA
+# prints IPv6 if configured
+  </code></pre>
+  <p>Next, verify that Cloudflare is serving your site over HTTPS with a valid certificate:</p>
+  <pre><code>curl -I https://example.dev
+# HTTP/2 200 (or 301 if redirected), with CF headers
+  </code></pre>
+  <p>Because <code>.dev</code> domains are HSTS preloaded, browsers will always upgrade to HTTPS. Until your VM is fully configured, Cloudflare’s edge certificates keep your site reachable and secure.</p>
+
+  <h2>Common pitfalls</h2>
+  <ul>
+    <li><strong>Nameservers not updated:</strong> Remember to change your domain’s nameservers at the registrar to Cloudflare’s assigned pair. Until you do, Cloudflare won’t be authoritative and your DNS won’t work as expected.</li>
+    <li><strong>Grey cloud (proxy off):</strong> If the proxy icon is grey, Cloudflare isn’t handling your traffic, so you won’t get HTTPS at the edge or CDN benefits. Turn the proxy on (orange cloud) to enable these features, especially important for <code>.dev</code> domains.</li>
+    <li><strong>Missing www redirect:</strong> Without a redirect from <code>www</code> to the apex domain, you risk split indexing by search engines and confusing URLs for visitors. Make sure to add the redirect rule.</li>
+    <li><strong>Forgot SSH key:</strong> If you didn’t add your public key when creating the VM, you might still be able to add it via your provider’s console. We’ll cover securing SSH access in detail in the next post.</li>
+  </ul>
+
+  <h2>Next up</h2>
+  <p>At this point, you own a domain, your DNS is live through Cloudflare, and your VM’s public IP is set up. Next, we’ll dive into securing your server—creating a non-root user, configuring SSH keys, applying updates, and setting up a baseline firewall. This is where your server starts to become truly production-ready. Stay tuned for <a href="/writeups/posts/2025-08-16-initial-server-hardening.html">Initial Server Hardening</a>.</p>
+
+  <h2>Changelog</h2>
+  <ul>
+    <li>2025‑08‑16: Initial publication.</li>
+  </ul>
+</article>
