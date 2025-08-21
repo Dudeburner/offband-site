@@ -138,9 +138,14 @@ nav.sidebar .row { display: flex; align-items: center; gap: .5rem; padding: .35r
 nav.sidebar .row:hover { background: rgba(255,255,255,.03); }
 nav.sidebar a { color: var(--text); }
 nav.sidebar a.active { color: #fff; text-shadow: 0 0 12px rgba(70,224,255,.35); }
+
 nav.sidebar .folder > .row { cursor: pointer; user-select: none; }
 nav.sidebar .twisty { width: 1ch; text-align: center; }
 nav.sidebar .toolbar { display: flex; gap: .5rem; margin-bottom: .5rem; }
+
+/* Hide/show child lists based on aria-expanded set by JS */
+nav.sidebar .folder[aria-expanded="false"] > ul { display: none; }
+nav.sidebar .folder[aria-expanded="true"]  > ul { display: block; }
 
 /* -------------------- CARDS / HERO / BUTTONS -------------------- */
 .card { background: var(--panel); border: var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: var(--pad-4); }
