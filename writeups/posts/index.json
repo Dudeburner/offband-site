@@ -1,20 +1,5 @@
 [
-  {
-    "title": "Initial Web Server Hardening for Deployment",
-    "date": "2025-08-16",
-    "file": "2025-08-16-initial-web-server-hardening.html",
-    "category": "Security"
-  },
-  {
-    "title": "Setting Up DNS and Domain",
-    "date": "2025-08-16",
-    "file": "2025-08-16-setting-up-dns-and-domain.html",
-    "category": "Networking"
-  },
-  {
-    "title": "Automating Web Server Deployment with GitHub",
-    "date": "2025-08-18",
-    "file": "2025-08-18-automating-web-server-deployment-with-github.html",
-    "category": "DevOps"
-  }
+  "/writeups/posts/2025-08-16-initial-web-server-hardening.html",
+  "/writeups/posts/2025-08-16-setting-up-dns-and-domain.html",
+  "/writeups/posts/2025-08-18-automating-web-server-deployment-with-github.html"
 ]
