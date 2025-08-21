@@ -54,15 +54,15 @@ deploy: preflight
 deploy-now: preflight
 	$(call CONFIRM,This will start site-update.service on the server)
 	@$(SSH_TTY) 'set -euo pipefail; \
-	  sudo systemctl start site-update.service; \
+	  sudo systemctl start deploy-offband.service; \
 	  echo "→ last 50 lines"; \
-	  sudo journalctl -u site-update.service -n 50 -o cat --since "-5 min" || true; \
+	  sudo journalctl -u deploy-offband.service -n 50 -o cat --since "-5 min" || true; \
 	  echo "✓ deploy requested"'
 
 .PHONY: tail
-## tail: follow logs for site-update.service
+## tail: follow logs for deploy process (/var/log/deploy_offband.log)
 tail:
-	@$(SSH_TTY) 'sudo journalctl -f -u site-update.service -o cat'
+	@$(SSH_TTY) 'sudo tail -F /var/log/deploy_offband.log'
 
 ## push-deploy: push then deploy (with both confirmations)
 push-deploy: push deploy
