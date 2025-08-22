@@ -89,6 +89,8 @@
 // Fetches /security/totals.json, /security/daily.csv, /security/daily/<UTC-YYYY-MM-DD>.ndjson
 // Safe fallbacks if files are missing. No backend execution required.
 (function(){
+  const GH_BASE = "https://raw.githubusercontent.com/Dudeburner/offband-data-public/main/security";
+  const gh = (p) => `${GH_BASE}${p}?t=${Math.floor(Date.now()/60000)}`; // 1‑min cache buster
   const $ = id => document.getElementById(id);
   const setText = (id, v) => { const el = $(id); if (el) el.textContent = v; };
   const toLocal = iso => { try { return new Date(iso).toLocaleString(undefined, {hour12:false}); } catch { return iso || "—"; } };
@@ -128,7 +130,7 @@
   };
 
   async function hydrateTiles(){
-    const totals = await fetchJSON("/security/totals.json");
+    const totals = await fetchJSON(gh("/totals.json"));
     if(totals && totals.totals){
       setText("kpi-updated", toLocal(totals.updated||""));
       setText("kpi-bans", Number(totals.totals.bans||0).toLocaleString());
@@ -140,7 +142,10 @@
     const list = $("recent-logs");
     if(!list) return;
     const today = utcToday();
-    const nd = await fetchText(`/security/daily/${today}.ndjson`);
+    let nd = await fetchText(gh(`/daily/${today}.ndjson`)); // prefer public data repo
+    if(!nd){
+      nd = await fetchText(`/security/daily/${today}.ndjson`); // fallback if self-hosted
+    }
     list.innerHTML = "";
     if(!nd){
       const li = document.createElement("li");
