@@ -84,3 +84,90 @@
     }
   })();
 })();
+
+// Security dashboard hydrator (reads sanitized artifacts)
+// Fetches /security/totals.json, /security/daily.csv, /security/daily/<UTC-YYYY-MM-DD>.ndjson
+// Safe fallbacks if files are missing. No backend execution required.
+(function(){
+  const $ = id => document.getElementById(id);
+  const setText = (id, v) => { const el = $(id); if (el) el.textContent = v; };
+  const toLocal = iso => { try { return new Date(iso).toLocaleString(undefined, {hour12:false}); } catch { return iso || "—"; } };
+  const utcToday = () => new Date().toISOString().slice(0,10); // YYYY-MM-DD
+  const fetchJSON = url => fetch(url, {cache:"no-store"}).then(r => r.ok ? r.json() : null).catch(()=>null);
+  const fetchText = url => fetch(url, {cache:"no-store"}).then(r => r.ok ? r.text() : "").catch(()=>"");
+  const parseCSV = txt => {
+    const lines = (txt||"").trim().split(/\r?\n/).filter(Boolean);
+    if(!lines.length) return [];
+    const head = lines[0].split(",");
+    return lines.slice(1).map(line => {
+      const cols = line.split(",");
+      const row = {};
+      head.forEach((h,i)=> row[h]=cols[i]);
+      return row;
+    });
+  };
+  const renderEvent = ev => {
+    const li = document.createElement("li");
+    li.className = "post-list-item";
+    let desc = "";
+    if (ev.source==="nginx" && ev.kind==="probe") {
+      desc = `HTTP probe ${ev.st||""} ${ev.p||""}`.trim();
+    } else if (ev.source==="nginx" && String(ev.kind).startsWith("tls_")) {
+      desc = `TLS ${ev.kind.replace("tls_","").replace(/_/g," ")}`;
+    } else if (ev.source==="firewall") {
+      desc = `Firewall ${ev.kind} ${ev.proto||""}${ev.dpt? " :"+ev.dpt:""}`.trim();
+    } else if (ev.source==="fail2ban") {
+      desc = `Fail2ban ${ev.kind}${ev.jail? " ("+ev.jail+")":""}`;
+    } else if (ev.source==="sshd") {
+      desc = `SSH ${ev.kind}`;
+    } else {
+      desc = `${ev.source||"event"} ${ev.kind||""}`.trim();
+    }
+    li.innerHTML = `<span class="muted">${toLocal(ev.ts||new Date().toISOString())}</span> · <strong>${desc}</strong>`;
+    return li;
+  };
+
+  async function hydrateTiles(){
+    const totals = await fetchJSON("/security/totals.json");
+    if(totals && totals.totals){
+      setText("kpi-updated", toLocal(totals.updated||""));
+      setText("kpi-bans", Number(totals.totals.bans||0).toLocaleString());
+      setText("kpi-bots", Number(totals.totals.bot_hits||0).toLocaleString());
+    }
+  }
+
+  async function hydrateRecent(){
+    const list = $("recent-logs");
+    if(!list) return;
+    const today = utcToday();
+    const nd = await fetchText(`/security/daily/${today}.ndjson`);
+    list.innerHTML = "";
+    if(!nd){
+      const li = document.createElement("li");
+      li.className="post-list-item";
+      li.innerHTML = `<span class="muted">No events published yet for ${today} (UTC).</span>`;
+      list.appendChild(li);
+      // also mirror last-blocked to last update if available
+      const up = $("kpi-updated");
+      if(up) setText("last-blocked", up.textContent || "—");
+      return;
+    }
+    const rows = nd.trim().split(/\r?\n/).filter(Boolean).slice(-10)
+      .map(line=>{try{return JSON.parse(line);}catch{return null;}}).filter(Boolean);
+    if(!rows.length){
+      const li=document.createElement("li"); li.className="post-list-item"; li.innerHTML=`<span class="muted">No events parsed for ${today}.</span>`; list.appendChild(li);
+      return;
+    }
+    rows.reverse().forEach(ev => list.appendChild(renderEvent(ev)));
+    const newest = rows[0];
+    if(newest && $("last-blocked")) setText("last-blocked", toLocal(newest.ts));
+  }
+
+  async function load(){
+    await hydrateTiles();
+    await hydrateRecent();
+  }
+
+  window.addEventListener("DOMContentLoaded", load);
+  setInterval(load, 5*60*1000);
+})();
